@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="../styles/semantic/semantic.min.css">
+    <link href="../styles/popup.css" rel="stylesheet" />
+    <script src="../scripts/jquery/jquery-3.1.1.min.js"></script>
+    <script src="../styles/semantic/semantic.min.js"></script>
+    <script src="../scripts/chromeExtensionAsync-3.3.0/chrome-extension-async.js"></script>
+    <script src="../scripts/common.js"></script>
+    <script src="../scripts/popup-common.js"></script>
+    <script src="./importpassport.js"></script>
+</head>
+
+<body>
+    <h5 class="ui header" style="background-color: white; padding:8px; margin-bottom:0px;">
+        <img src="../images/shared/bridge-token.png" style="width:15px; margin-left:10px; margin-top:-2px;">
+        <div class="content">
+            Import Bridge Passport
+            <div class="sub header"></div>
+        </div>
+    </h5>
+    <div id="content" class="ui inverted segment" style="background-color:transparent; margin:0px; min-height:445px;">
+        <div style="width:100%; text-align:center;">
+            <img src="../images/shared/bridge-white.png" style="width:300px; margin:50px;" />
+        </div>
+        <div id="loading_spinner" class="ui active dimmer">
+            <div class="ui text loader"></div>
+            <img src="../images/shared/bridge-token.png" style="width:75px; margin-bottom:3px;">
+            <p id="loading_spinner_message">&nbsp;</p>
+        </div>
+        <div id="import_passport_container">
+            <div class="ui form">
+                <div class="field" style="text-align:justify;">
+                    To import your previously saved passport, just select the file and provide the passphrase.
+                </div>
+                <div class="field">
+                    <input id="import_file" name="import_file" type="file" style="margin:0px;" />
+                </div>
+                <div class="field">
+                    <div class="ui labeled input">
+                        <div class="ui label">
+                            Passphrase:
+                        </div>
+                        <input id="import_passphrase" type="password" placeholder="">
+                    </div>
+                    <div id="error" class="error"></div>
+                </div>
+                <div class="field">
+                    <button id="import_passport_button" class="ui button purple">Import Bridge Passport</button>
+                </div>
+                <div class="field" style="text-align:left;">
+                    <a href="#" id="create_passport_link" href="#" style="color:white;">
+                        < Back to Create Passport</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

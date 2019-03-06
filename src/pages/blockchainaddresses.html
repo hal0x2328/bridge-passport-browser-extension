@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="../styles/semantic/semantic.min.css">
+    <link href="../styles/popup.css" rel="stylesheet" />
+    <script src="../scripts/jquery/jquery-3.1.1.min.js"></script>
+    <script src="../styles/semantic/semantic.min.js"></script>
+    <script src="../scripts/chromeExtensionAsync-3.3.0/chrome-extension-async.js"></script>
+    <script src="../scripts/common.js"></script>
+    <script src="../scripts/popup-common.js"></script>
+    <script src="./blockchainaddresses.js"></script>
+    <style>
+        .blockchain-info {
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <h5 class="ui header" style="background-color: white; padding:8px;">
+        <a href="#" id="back_button">
+            <i class="arrow left icon black"></i>
+        </a>
+        <div class="content">
+            My Public Blockchain Addresses
+            <div class="sub header"></div>
+        </div>
+    </h5>
+    <div id="content" class="ui basic inverted segment" style="background-color: transparent; text-align:left; min-height:280px; margin-top:0px; padding-top:0px;">
+        <h4>Blockchain Addresses</h4>
+        <div id="blockchain_list">
+            <div>You don't have any associated blockchain addresses</div>
+        </div>
+    </div>
+    <div class="ui basic segment" style="margin-bottom:0px; display:none;">
+        <button id="add_blockchain_button" class="ui button purple" type="button">Associate Blockchain Address</button>
+    </div>
+    <div id="loading_spinner" class="ui active dimmer">
+        <div class="ui text loader"></div>
+        <img src="../images/shared/bridge-token.png" style="width:75px; margin-bottom:3px;">
+        <p id="loading_spinner_message" style="color:white;">&nbsp;</p>
+    </div>
+    <div style="display:none;">
+        <div class="ui clearing segment blockchain-template" style="margin:4px; padding:8px;">
+            <div style="display:inline-table;">
+                <img class="blockchain-logo" src="../images/shared/neo-logo.png" style="width:48px; height:48px; margin:24px 8px 8px 4px;"
+                />
+            </div>
+            <div style="display:inline-table; vertical-align:top; padding-top:4px;">
+                <div class="blockchain-info">
+                    <b>Network</b>:
+                    <span class="blockchain-network"></span>
+                </div>
+                <div class="blockchain-info">
+                    <b>Address</b>:
+                    <span class="blockchain-address"></span>
+                </div>
+                <div class="blockchain-info">
+                    <b>Private Key</b>:
+                    <a href='#' class='view-key'>[View]</a>
+                </div>
+                <div class="blockchain-info">
+                    <b>Balance:</b>
+                    <span id="blockchain-balance">
+                        <span class="blockchain-balance">0</span>
+                        <img src="../images/shared/bridge-token.png" style="width:10px; margin-top:4px;">
+                    </span>
+                </div>
+                <div class="blockchain-info">
+                    <b>Registered:</b>
+                    <span id="blockchain-registered">
+                        <span class="blockchain-registered">No
+                            <a href="#" class="blockchain-register">[Register]</a>
+                        </span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="key_modal" class="ui modal">
+        <div id="key_modal_text" class="header" style="font-size:14px;"></div>
+        <div class="content">
+            <div class="ui labeled input" style="width:100%;">
+                <input type="text" id="wif_value" style="font-size:12px;" disabled>
+                <div id="copy_wif_label" class="ui corner label">
+                    <a id="copy_wif" data-content="Private Key Copied to Clipboard" style="cursor:pointer;">
+                        <i class="copy icon"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="actions">
+            <div id="ok_button" class="ui button cancel">OK</div>
+        </div>
+    </div>
+</body>
+
+</html>

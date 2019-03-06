@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="../styles/semantic/semantic.min.css">
+    <link href="../styles/popup.css" rel="stylesheet" />
+    <script src="../scripts/jquery/jquery-3.1.1.min.js"></script>
+    <script src="../styles/semantic/semantic.min.js"></script>
+    <script src="../scripts/chromeExtensionAsync-3.3.0/chrome-extension-async.js"></script>
+    <script src="../scripts/common.js"></script>
+    <script src="../scripts/popup-common.js"></script>
+    <script src="./passportverifications.js"></script>
+    <style>
+    </style>
+</head>
+
+<body>
+    <h5 class="ui header" style="background-color: white; padding:8px;">
+        <a href="#" id="back_button">
+            <i class="arrow left icon black"></i>
+        </a>
+        <div class="content">
+            My Verification Requests
+            <div class="sub header"></div>
+        </div>
+    </h5>
+    <div id="content" class="ui basic inverted segment" style="background-color: transparent; text-align:left; min-height:350px; margin-top:0px; padding-top:0px;">
+        <div id="verification_request_list" style="display:none;">
+            <div>You haven't created any Verification Requests yet</div>
+        </div>
+    </div>
+    <div class="ui basic segment" style="margin-bottom:0px;">
+        <button id="create_verification_request_button" class="ui button purple" type="button">Create New Claims Verification Request</button>
+    </div>
+    <div id="loading_spinner" class="ui active dimmer">
+        <div class="ui text loader"></div>
+        <img src="../images/shared/bridge-token.png" style="width:75px; margin-bottom:3px;">
+        <p id="loading_spinner_message">&nbsp;</p>
+    </div>
+    <div style="display:none;">
+        <div class="ui clearing segment application-template" style="margin:4px; padding:8px;">
+            <div style="display:inline-table; vertical-align:top;">
+                <b>Id: </b>
+                <a href="#" class="header application-link" style="color:purple; font-weight:bold;"><span class="application-name"></span></a>
+                <div class="application-partner"></div>
+                <div class="application-detail"></div>
+            </div>
+            <div class="ui right floated purple button application-link" style="margin-top:10px;">View</div>
+        </div>
+    </div>
+</body>
+
+</html>

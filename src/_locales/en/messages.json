@@ -1,0 +1,14 @@
+{
+  "appName": {
+    "message": "Bridge Passport",
+    "description": "Bridge Passport for Bridge Protocol"
+  },
+  "appDescription": {
+    "message": "Bridge Passport extension to allow users to manage their Bridge Passport on the Bridge Protocol Network",
+    "description": "Bridge Passport extension to allow users to manage their Bridge Passport on the Bridge Protocol Network"
+  },
+  "btnTooltip": {
+    "message": "Bridge Passport",
+    "description": "Bridge Protocol - Bridge Passport"
+  }
+}

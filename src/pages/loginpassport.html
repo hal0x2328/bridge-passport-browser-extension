@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="../styles/semantic/semantic.min.css">
+    <link href="../styles/popup.css" rel="stylesheet" />
+    <script src="../scripts/jquery/jquery-3.1.1.min.js"></script>
+    <script src="../styles/semantic/semantic.min.js"></script>
+    <script src="../scripts/chromeExtensionAsync-3.3.0/chrome-extension-async.js"></script>
+    <script src="../scripts/common.js"></script>
+    <script src="../scripts/popup-common.js"></script>
+    <script src="./loginpassport.js"></script>
+</head>
+
+<body>
+    <h5 class="ui header" style="background-color: white; padding:8px;">
+        <img src="../images/shared/bridge-token.png" style="width:25px;">
+        <div class="content">
+            Authenticate with Bridge Passport
+            <div class="sub header"></div>
+        </div>
+    </h5>
+    <div id="content" class="ui inverted segment" style="min-height:200px; background-color:transparent; display:none;">
+        <div style="width:100%; text-align:center; margin:10px;">
+            <img src="../images/shared/bridge-white.png" style="width:300px;" />
+        </div>
+        <div id="passport_details_container" class="ui inverted segment" style="text-align:left; min-height: 100px;">
+            <div id="login_requester">
+                <h5>Requesting Site</h5>
+                <div id="login_unknown_site" class="error" style="display:none; padding-top:10px;">
+                    WARNING: The passport or partner making this request is unknown by the Bridge Protocol Network. Proceed at your own risk.
+                </div>
+                <div id="login_known_site" style="display:none;">
+                    <div id="login_known_id"></div>
+                    <div id="login_known_name"></div>
+                    <div id="login_known_locations"></div>
+                </div>
+                <div id="login_invalid_signature" class="error" style="display:none; padding-top:10px;">
+                    WARNING: The signature in the request could not be verified.  This could be a forged request, proceed at your own risk.
+                </div>
+            </div>
+            <div id="login_claims" style="margin-top:6px;">
+                <div id="login_no_claims_container">
+                    (This request will not include any personal claims)
+                </div>
+                <div id="login_public_claims_container" style="display:none;">
+                    <h5 style="text-align:left; margin-top:12px;">
+                        Public Information Requested (Automatically sent)
+                    </h5>
+                    <div id="login_public_claims_list">
+
+                    </div>
+                </div>
+                <div id="login_private_claims_container" style="display:none;">
+                    <h5 style="text-align:left; margin-top:12px;">
+                        Private Information Requested (Opt-in, remove check to exclude)
+                    </h5>
+                    <div id="login_private_claims_list">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button id="login_button" class="ui button purple">Login with Passport</button>
+        <button id="view_details_button" class="ui button purple" style="margin-top:12px;">View Passport Details</button>
+    </div>
+    <div id="loading_spinner" class="ui active dimmer">
+        <div class="ui text loader"></div>
+        <img src="../images/shared/bridge-token.png" style="width:75px; margin-bottom:3px;">
+        <p id="loading_spinner_message">&nbsp;</p>
+    </div>
+</body>
+
+</html>

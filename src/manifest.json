@@ -1,0 +1,46 @@
+{
+  "name": "Bridge Passport",
+  "version": "1.1",
+  "manifest_version": 2,
+  "description": "Extension to allow users to create, manage, and use their Bridge Passport on the Bridge Protocol Network",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "128": "icons/icon-128.png"
+  },
+  "default_locale": "en",
+  "background": {
+    "page": "background.html"
+  },
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "storage",
+    "downloads",
+	"<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*/*"
+      ],
+      "js": [
+        "scripts/jquery/jquery-3.1.1.min.js",        
+        "scripts/common.js",
+        "scripts/contentscript.js"
+      ],
+      "run_at": "document_end",
+      "all_frames": false
+    }
+  ],
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "browser_action": {
+    "default_icon": {
+      "19": "icons/icon-19.png",
+      "38": "icons/icon-38.png"
+    },
+    "default_title": "Bridge Passport",
+    "default_popup": "./popup.html"
+  }
+}
+
+

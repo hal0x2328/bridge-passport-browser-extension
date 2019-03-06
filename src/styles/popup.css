@@ -1,0 +1,38 @@
+html, body{
+  font-family: Arial, Helvetica;
+  margin:0px;
+  padding:0px;
+  min-width:500px;
+  min-height:375px;
+  width:500px;
+  background-color: #222222;
+}
+
+#content {
+  min-width: 500px;
+  max-width: 500px;
+  text-align: center;
+}
+
+button
+{
+  width:100%;
+}
+
+a:hover{
+  color: plum;
+}
+
+.error{
+  color:red;
+  text-align:left;
+}
+
+input:disabled {
+  opacity: 1 !important;
+  color: #333333 !important;
+}
+
+.inverted{
+  background-color: #222222 !important;
+}

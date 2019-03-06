@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="../styles/semantic/semantic.min.css">
+    <link href="../styles/popup.css" rel="stylesheet" />
+    <script src="../scripts/jquery/jquery-3.1.1.min.js"></script>
+    <script src="../styles/semantic/semantic.min.js"></script>
+    <script src="../scripts/chromeExtensionAsync-3.3.0/chrome-extension-async.js"></script>
+    <script src="../scripts/common.js"></script>
+    <script src="../scripts/popup-common.js"></script>
+    <script src="./passportclaims.js"></script>
+    <style>
+        .claim-template{
+            vertical-align:top;
+        }
+        .claim-signature{
+            font-size:11px;
+        }
+        .claim-expires{
+            font-size:11px;
+        }
+        .claim-name{
+            margin-top:0px;
+        }
+        .remove-claim{
+            color: #999999;
+        }
+    </style>
+</head>
+
+<body>
+    <h5 class="ui header" style="background-color: white; padding:8px;">
+        <a href="#" id="back_button">
+            <i class="arrow left icon black"></i>
+        </a>
+        <div class="content">
+            My Verified Information (Claims)
+            <div class="sub header"></div>
+        </div>
+    </h5>
+    <div id="no_claims_message" class="ui basic inverted segment" style="display:none; background-color: transparent; text-align:left; margin:0px; padding:0px;">
+        <div style="min-height:350px; padding:0px 20px 0px 20px;">
+            You do not have any verified information in your passport. To get started, create a verification request.
+        </div>
+        <div class="ui basic segment" style="margin-bottom:0px;">
+            <button id="create_verification_request_button" class="ui button purple" type="button">Create New Claims Verification Request</button>
+        </div>
+    </div>
+    <div id="claims_list" class="ui basic inverted segment" style="margin-top:-10px; background-color:transparent; display:none;"></div>
+    <div id="loading_spinner" class="ui active dimmer">
+        <div class="ui text loader"></div>
+        <img src="../images/shared/bridge-token.png" style="width:75px; margin-bottom:3px;">
+        <p id="loading_spinner_message">&nbsp;</p>
+    </div>
+    <div style="display:none;">
+        <div class="ui segment claim-template" style="padding:2px; margin:2px; margin-right:25px;">
+            <a href="#" class="remove-claim"><i class="trash alternate outline icon" style="float:right; display:none;"></i></a>
+            <div style="display:inline-table; background-color:#a333c8; border-radius:5px;">
+                <img src="../images/shared/bridge-token-white.png" style="width:36px; margin:10px;">
+            </div> 
+            <div style="display:inline-table; vertical-align:top; margin-left:4px;">
+                <div class="claim-name"></div>
+                <div class="claim-expires"></div>
+                <div class="claim-signature">Verified By: <span class="claim-signature-link"></span></div>
+            </div>       
+        </div>
+    </div>
+</body>
+
+</html>
