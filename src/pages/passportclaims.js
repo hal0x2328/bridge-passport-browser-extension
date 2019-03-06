@@ -42,7 +42,17 @@ async function initUI() {
 function getClaimItem(claim) {
     var claimItem = $(_claimTemplate).clone();
     $(claimItem).find(".claim-name").html("<b>" + claim.claimTypeName + ":</b> " + claim.claimValue);
-    $(claimItem).find(".claim-expires").text("Expires On:" + new Date(claim.expiresOn * 1000).toLocaleDateString());
+
+    let expiresOn;
+    if(!claim.expiresOn || claim.expiresOn == 0) //Does not expire
+    {
+        expiresOn = "None";
+    }
+    else if(claim.expiresOn > 0){
+        expiresOn = new Date(claim.expiresOn * 1000).toLocaleDateString();
+    }
+
+    $(claimItem).find(".claim-expires").text("Expires On: " + expiresOn);
     $(claimItem).find(".claim-signature-link").text(claim.signedById);
     $(claimItem).find(".partner-details-link").attr("data-passportid",claim.signedById);
     return claimItem;
