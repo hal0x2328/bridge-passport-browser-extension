@@ -157,10 +157,19 @@ async function removeClaims() {
 
 function getClaimItem(claim) {
     var claimItem = $(_claimTemplate).clone();
-    let expiresOn = new Date(claim.expiresOn * 1000);
     var checkBox = $(claimItem).find("input[type=checkbox]");
     checkBox.attr('id', claim.claimTypeId);
     $(claimItem).find(".claim-name").text(" (" + claim.claimTypeId + ") " + claim.claimTypeName + ": " + claim.claimValue);
-    $(claimItem).find(".claim-detail").text("Expires on: " + expiresOn.toLocaleDateString());
+
+    let expiresOn;
+    if(!claim.expiresOn || claim.expiresOn == 0) //Does not expire
+    {
+        expiresOn = "None";
+    }
+    else if(claim.expiresOn > 0){
+        expiresOn = new Date(claim.expiresOn * 1000).toLocaleDateString();
+    }
+
+    $(claimItem).find(".claim-detail").text("Expires on: " + expiresOn);
     return claimItem;
 }
