@@ -82,7 +82,6 @@ function getParamsFromLocation() {
 
 async function checkPassportLogin() {
 	var login = null;
-
 	try {
 		login = await getPassportLogin();
 	}
@@ -92,6 +91,23 @@ async function checkPassportLogin() {
 
 	if (login) {
 		loadPage("loginpassport");
+		return true;
+	}
+
+	return false;
+}
+
+async function checkPassportPayment(){
+	var payment = null;
+	try{
+		payment = await getPassportPayment();
+	}
+	catch(err){
+		alert(err);
+	}
+
+	if(payment){
+		loadPage("passportpayment");
 		return true;
 	}
 
@@ -235,12 +251,35 @@ async function getVerificationPartners() {
 }
 
 async function getPassportLogin() {
-	var tabs = await _browser.tabs.query({ active: true, currentWindow: true });
-	let message = {
-		action: 'getBridgeLoginRequest'
-	};
+	try{
+		var tabs = await _browser.tabs.query({ active: true, currentWindow: true });
+		let message = {
+			action: 'getBridgeLoginRequest'
+		};
+	
+		return await _browser.tabs.sendMessage(tabs[0].id, message);
+	}
+	catch(err){
+		
+	}
 
-	return await _browser.tabs.sendMessage(tabs[0].id, message);
+	return null;
+}
+
+async function getPassportPayment() {
+	try{
+		var tabs = await _browser.tabs.query({ active: true, currentWindow: true });
+		let message = {
+			action: 'getBridgePaymentRequest'
+		};
+	
+		return await _browser.tabs.sendMessage(tabs[0].id, message);
+	}
+	catch(err){
+
+	}
+
+	return null;
 }
 
 async function sendPassportLogin(passportId, responseValue) {
@@ -249,6 +288,16 @@ async function sendPassportLogin(passportId, responseValue) {
 		action: 'sendBridgeLoginResponse',
 		passportId,
 		responseValue
+	};
+
+	return await _browser.tabs.sendMessage(tabs[0].id, message);
+}
+
+async function sendPassportPayment(transactionId){
+	var tabs = await _browser.tabs.query({ active: true, currentWindow: true });
+	let message = {
+		action: 'sendBridgePaymentResponse',
+		transactionId
 	};
 
 	return await _browser.tabs.sendMessage(tabs[0].id, message);
@@ -286,8 +335,8 @@ async function registerBlockchainAddress(network, address) {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'registerBlockchainAddress', network, address });
 }
 
-async function sendBlockchainPayment(network, amount, paymentIdentifier) {
-	return await _browser.runtime.sendMessage({ target: 'background', action: 'sendBlockchainPayment', network, amount, paymentIdentifier});
+async function sendBlockchainPayment(network, amount, paymentIdentifier, recipientAddress) {
+	return await _browser.runtime.sendMessage({ target: 'background', action: 'sendBlockchainPayment', network, amount, paymentIdentifier, recipientAddress});
 }
 
 async function getBlockchainPassportInfo(network, passportId) {

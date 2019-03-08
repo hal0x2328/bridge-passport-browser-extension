@@ -359,15 +359,18 @@ async function registerBlockchainAddress(network, address) {
   return await passportHelper.addBlockchainAddress(network, address);
 }
 
-async function sendBlockchainPayment(network, amount, paymentIdentifier) {
+async function sendBlockchainPayment(network, amount, paymentIdentifier, recipientAddress) {
   var blockchainHelper = new BridgeProtocol.Blockchain(_settings.apiBaseUrl, _passport, _passphrase);
   if (!_scriptHash) {
     _scriptHash = await blockchainHelper.getBridgeScriptHash(network);
   }
 
-  let bridgeWallet = await blockchainHelper.getBridgeWallet(network);
+  if(!recipientAddress){
+    recipientAddress = await blockchainHelper.getBridgeWallet(network);
+  }
+  
   var passportHelper = new BridgeProtocol.Passport(_settings.apiBaseUrl, _passport, _passphrase, _scriptHash);
-  return await passportHelper.sendPayment(network, amount, bridgeWallet, paymentIdentifier);
+  return await passportHelper.sendPayment(network, amount, recipientAddress, paymentIdentifier);
 }
 
 async function getBlockchainPassportInfo(network, passportId) {

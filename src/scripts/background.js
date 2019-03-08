@@ -215,7 +215,7 @@ _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) 
   }
 
   if (request.action == "sendBlockchainPayment") {
-    sendBlockchainPayment(request.network, request.amount, request.paymentIdentifier).then(sendResponse);
+    sendBlockchainPayment(request.network, request.amount, request.paymentIdentifier, request.recipientAddress).then(sendResponse);
     return true;
   }
 
