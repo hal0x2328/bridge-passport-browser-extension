@@ -155,6 +155,11 @@ _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) 
     return true;
   }
 
+  if(request.action == "updateApplicationTransaction"){
+    updateApplicationTransaction(request.applicationId, request.network, request.transactionId).then(sendResponse);
+    return true;
+  }
+
   if(request.action == "resendApplication"){
     resendApplication(request.applicationId).then(sendResponse);
     return true;
@@ -210,7 +215,7 @@ _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) 
   }
 
   if (request.action == "sendBlockchainPayment") {
-    sendBlockchainPayment(request.network, request.amount).then(sendResponse);
+    sendBlockchainPayment(request.network, request.amount, request.paymentIdentifier, request.recipientAddress).then(sendResponse);
     return true;
   }
 

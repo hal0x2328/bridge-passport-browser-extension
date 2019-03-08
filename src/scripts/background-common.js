@@ -140,9 +140,14 @@ async function getBridgePassportId() {
   return await bridgeHelper.getBridgePassportId();
 }
 
-async function createApplication(partner, serviceTypes, paymentNetwork, paymentTransactionId) {
+async function createApplication(partner) {
   let applicationHelper = new BridgeProtocol.Application(_settings.apiBaseUrl, _passport, _passphrase);
-  return await applicationHelper.createApplication(partner, serviceTypes, paymentNetwork, paymentTransactionId); 
+  return await applicationHelper.createApplication(partner); 
+}
+
+async function updateApplicationTransaction(applicationId, network, transactionId){
+  let applicationHelper = new BridgeProtocol.Application(_settings.apiBaseUrl, _passport, _passphrase);
+  return await applicationHelper.updatePaymentTransaction(applicationId, network, transactionId);
 }
 
 async function resendApplication(applicationId) {
@@ -354,15 +359,18 @@ async function registerBlockchainAddress(network, address) {
   return await passportHelper.addBlockchainAddress(network, address);
 }
 
-async function sendBlockchainPayment(network, amount) {
+async function sendBlockchainPayment(network, amount, paymentIdentifier, recipientAddress) {
   var blockchainHelper = new BridgeProtocol.Blockchain(_settings.apiBaseUrl, _passport, _passphrase);
   if (!_scriptHash) {
     _scriptHash = await blockchainHelper.getBridgeScriptHash(network);
   }
 
-  let bridgeWallet = await blockchainHelper.getBridgeWallet(network);
+  if(!recipientAddress){
+    recipientAddress = await blockchainHelper.getBridgeWallet(network);
+  }
+  
   var passportHelper = new BridgeProtocol.Passport(_settings.apiBaseUrl, _passport, _passphrase, _scriptHash);
-  return await passportHelper.sendPayment(network, amount, bridgeWallet);
+  return await passportHelper.sendPayment(network, amount, recipientAddress, paymentIdentifier);
 }
 
 async function getBlockchainPassportInfo(network, passportId) {
