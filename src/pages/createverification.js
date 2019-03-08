@@ -7,8 +7,8 @@ $(function () {
 });
 
 async function Init() {
-    
-    if(!await checkBridgeOnline()){
+
+    if (!await checkBridgeOnline()) {
         alert("Error communicating with Bridge.  Please check your connection.");
         loadPage("passportdetails");
         return;
@@ -17,7 +17,7 @@ async function Init() {
     _partners = await getVerificationPartners();
     _fee = await getNetworkFee();
 
-    if(!_fee){
+    if (!_fee) {
         alert("Error getting network fees.  Please check your connection.");
         loadPage("passportdetails");
         return;
@@ -100,55 +100,62 @@ async function createVerificationRequest() {
         return;
     }
 
-    await sendPayment(partnerId, address);
+    showWait("Creating request on Bridge Protocol Network...");
+    let application = await createApplication(partnerId);
+    if (!application) {
+        alert("Could not create verification request.");
+        hideWait();
+        return;
+    }
+
+    await sendPayment(application, address);
 }
 
-async function sendPayment(partnerId, address) {
+async function sendPayment(application, address) {
+    var applicationId = application.id;
+
     //Send the transaction
-    showWait("Sending fee payment transaction...", true);
+    showWait("Sending fee payment transaction...");
     setTimeout(async function () {
         let transactionId;
         if (_fee > 0) {
-            transactionId = await sendBlockchainPayment(address.network, _fee);
+            transactionId = await sendBlockchainPayment(address.network, _fee, applicationId);
             if (!transactionId) {
                 alert("Error sending payment transaction to " + address.network);
                 hideWait();
                 return;
             }
-        }
 
-        showWait("Sending verification request to network...");
-        setTimeout(async function () {
-            var application = await createApplication(partnerId, address.network, transactionId);
+            //Update the network transaction Id
+            let application = await updateApplicationTransaction(applicationId, address.network, transactionId);
             if (!application) {
-                alert("Could not create verification request.");
+                alert("Error updating application transaction");
                 hideWait();
                 return;
             }
+        }
 
-            showWait("Waiting for payment verification...");
-            let applicationId = application.id;
-            checkApplicationPaymentStatus(applicationId, async function (application) {
-                if (application.status != "paymentReceived") {
-                    alert("Payment not received.  The verification request is on the network but cannot be transmitted to the third party verifier until the payment transaction is successful.  Please retry the payment later from the Verification Request details page.");
-                    loadPage("verificationdetails", applicationId);
-                    return;
+        showWait("Waiting for payment verification...");
+        checkApplicationPaymentStatus(applicationId, async function (application) {
+            if (application.status != "paymentReceived") {
+                alert("Payment not received.  The verification request is on the network but cannot be transmitted to the third party verifier until the payment transaction is successful.  Please retry the payment later from the Verification Request details page.");
+                loadPage("verificationdetails", applicationId);
+                return;
+            }
+
+            setTimeout(async function () {
+                //Transmit
+                showWait("Transmitting request to verification partner...");
+                var application = await resendApplication(applicationId);
+                if (!application || application.status != "receivedByPartner") {
+                    alert("The verification request was created successfully on the network, but the Bridge Protocol Verification Partner did not successfully accept the request.  Please retry the transmission later from the Verification Request details page.");
+                }
+                else if (application.url) {
+                    window.open(application.url);
                 }
 
-                setTimeout(async function () {
-                    //Transmit
-                    showWait("Transmitting request to verification partner...");
-                    var application = await resendApplication(applicationId);
-                    if (!application || application.status != "receivedByPartner") {
-                        alert("The verification request was created successfully on the network, but the Bridge Protocol Verification Partner did not successfully accept the request.  Please retry the transmission later from the Verification Request details page.");
-                    }
-                    else if (application.url) {
-                        window.open(application.url);
-                    }
-
-                    loadPage("passportverifications");
-                }, 1000);
-            });
-        }, 1000);
+                loadPage("passportverifications");
+            }, 1000);
+        });
     }, 50);
 }

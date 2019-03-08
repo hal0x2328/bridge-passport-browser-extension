@@ -206,8 +206,12 @@ async function getApplication(applicationId) {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'getApplication', applicationId });
 }
 
-async function createApplication(partner, serviceTypes, paymentNetwork, paymentTransactionId) {
-	return await _browser.runtime.sendMessage({ target: 'background', action: 'createApplication', partner, serviceTypes, paymentNetwork, paymentTransactionId });
+async function createApplication(partner) {
+	return await _browser.runtime.sendMessage({ target: 'background', action: 'createApplication', partner });
+}
+
+async function updateApplicationTransaction(applicationId, network, transactionId){
+	return await _browser.runtime.sendMessage({ target: 'background', action: 'updateApplicationTransaction', applicationId, network, transactionId });
 }
 
 async function resendApplication(applicationId){
@@ -282,8 +286,8 @@ async function registerBlockchainAddress(network, address) {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'registerBlockchainAddress', network, address });
 }
 
-async function sendBlockchainPayment(network, amount) {
-	return await _browser.runtime.sendMessage({ target: 'background', action: 'sendBlockchainPayment', network, amount });
+async function sendBlockchainPayment(network, amount, paymentIdentifier) {
+	return await _browser.runtime.sendMessage({ target: 'background', action: 'sendBlockchainPayment', network, amount, paymentIdentifier});
 }
 
 async function getBlockchainPassportInfo(network, passportId) {
