@@ -33,7 +33,7 @@ async function initUI(addresses) {
                 addresses[i].balance = info.balance;
             }
 
-            if (info && info.successful && info.response != null && info.response.value != null) {
+            if (info && info.registered) {
                 addresses[i].registered = true;
             }
 

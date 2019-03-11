@@ -84,17 +84,13 @@ async function createVerificationRequest() {
     let balance = 0;
     let info = await getBlockchainAddressInfo(address.network, address.address);
 
-    if (!info || !info.successful) {
+    if (!info || !info.registered) {
         alert("Could not get blockchain address information for payment.  Please make sure you register your blockchain address before attempting to purchase services on the network.");
         hideWait();
         return;
     }
 
-    if (info.balance != null) {
-        balance = info.balance;
-    }
-
-    if (balance < _fee) {
+    if (info.balance < _fee) {
         alert("Insufficient balance to pay network fees, cost: " + _fee);
         hideWait();
         return;
