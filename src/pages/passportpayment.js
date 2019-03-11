@@ -27,7 +27,7 @@ async function initUI() {
         let address = addresses[0];
         let info = await getBlockchainAddressInfo(address.network, address.address);
 
-        if (!info || !info.successful) {
+        if (!info || !info.registered) {
             alert("Could not get blockchain address information for payment.  Please make sure you register your blockchain address before attempting to purchase services on the network.");
             hideWait();
             return;
