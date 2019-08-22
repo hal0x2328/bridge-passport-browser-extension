@@ -3,11 +3,11 @@ document.title = 'Bridge Passport';
 
 function showWait(message, twoLine) {
 	if (twoLine) {
-		$("#loading_spinner").find("img").css("margin-top", "28px");
-		$("#loading_spinner_message").css("padding-top", "10px");
+		$("#loading_spinner").find("img").css("margin-top", "-82px");
+		$("#loading_spinner_message").css("padding-top", "0px");
 	}
 	else {
-		$("#loading_spinner").find("img").css("margin-top", "0px");
+		$("#loading_spinner").find("img").css("margin-top", "-80px");
 		$("#loading_spinner_message").css("padding-top", "0px");
 	}
 
@@ -15,12 +15,22 @@ function showWait(message, twoLine) {
 	$("#loading_spinner").show();
 }
 
+function showRefreshSectionProgress(icon){
+	$(icon).addClass("refresh");
+	$(icon).addClass("refresh-animation");
+}
+
+function hideRefreshSectionProgress(icon){
+	$(icon).removeClass("refresh");
+	$(icon).removeClass("refresh-animation");
+}
+
 function hideWait() {
 	window.setTimeout(hideSpinner, 200);
 }
 
 function hideSpinner() {
-	$("#loading_spinner_message").text("&nbsp;");
+	$("#loading_spinner_message").text("");
 	$("#loading_spinner").hide();
 }
 
@@ -33,13 +43,6 @@ function makeStringReadable(str) {
 
 	return str;
 }
-
-window.addEventListener('focus', function () {
-	var img = _browser.extension.getURL("/images/shared/background.png");
-	$('body').css("background-image", '');
-	$('body').css("background-image", img);
-});
-
 
 //Utility
 async function loadPage(pageName, params, popup) {
@@ -54,12 +57,23 @@ async function loadPage(pageName, params, popup) {
 			url = url + "?params=" + params;
 		}
 
-		var height = 520;
-		var width = 515;
+		var height = screen.height * .80;
+		var width = screen.width * .50;
+
+		if(height < 1024)
+			height = screen.height;
+		else if(height > 1024)
+			height = 1024;
+
+		if(width < 1280)
+			width = screen.width;
+		else if(width > 1280)
+			width = 1280;
+
 		var windowSize = {
 			height,
 			width,
-			left: window.screenX,
+			left: window.screenX-(width/2),
 			top: window.screenY
 		};
 
@@ -89,12 +103,7 @@ async function checkPassportLogin() {
 
 	}
 
-	if (login) {
-		loadPage("loginpassport");
-		return true;
-	}
-
-	return false;
+	return login;
 }
 
 async function checkPassportPayment(){
@@ -106,12 +115,7 @@ async function checkPassportPayment(){
 		alert(err);
 	}
 
-	if(payment){
-		loadPage("passportpayment");
-		return true;
-	}
-
-	return false;
+	return payment;
 }
 
 function exportPassport(passport) {
@@ -141,18 +145,6 @@ async function checkBridgeOnline(){
 	return false;
 }
 
-async function checkTransactionComplete(network, transactionId, callback) {
-	setTimeout(async function () {
-		var res = await checkBlockchainTransactionComplete(network, transactionId);
-		if(!res){
-			checkTransactionComplete(network, transactionId, callback);
-		}
-		else{
-			callback();
-		}
-	}, 15000);
-}
-
 async function checkApplicationPaymentStatus(applicationId, callback){
 	setTimeout(async function () {
 		let application = await getApplication(applicationId);
@@ -170,16 +162,16 @@ async function getBridgePassportId(){
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'getBridgePassportId' });
 }
 
-async function getPassphrase(callback) {
+async function getPassphrase() {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'getPassphrase' });
 }
 
-async function getPassportFromStorage(callback) {
+async function getPassportFromStorage() {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'getPassportFromStorage' });
 }
 
-async function createPassport(passphrase) {
-	return await _browser.runtime.sendMessage({ target: 'background', action: 'createPassport', passphrase });
+async function createPassport(passphrase, neoWif, autoCreate) {
+	return await _browser.runtime.sendMessage({ target: 'background', action: 'createPassport', passphrase, neoWif, autoCreate });
 }
 
 async function getPassportDetails() {
@@ -206,7 +198,7 @@ async function closePassport() {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'closePassport' });
 }
 
-async function removePassport(callback) {
+async function removePassport() {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'removePassport' });
 }
 
@@ -214,7 +206,7 @@ async function getPassportClaims() {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'getClaims' });
 }
 
-async function getApplications(callback) {
+async function getApplications() {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'getApplications' });
 }
 

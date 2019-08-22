@@ -1,0 +1,129 @@
+html, body
+{
+    font-family: sans-serif !important;
+    margin:0px;
+    padding:0px;
+    width:100%;
+    height:100%;
+    font-weight: 400 !important;
+}
+
+.item{
+    font-size:.8em !important;
+}
+
+button{
+    width: 100% !important;
+}
+
+.main-section{
+    height:100% !important; 
+    padding:0px !important;
+}
+
+.main-section-header{
+    font-weight:bold;
+    color: white !important;
+    border: 0px !important;
+    background: rgb(144,64,153) !important;
+    background: -moz-linear-gradient(343deg, rgba(144,64,153,1) 0%, rgba(97,85,163,1) 62%, rgba(52,139,201,1) 100%) !important;
+    background: -webkit-linear-gradient(343deg, rgba(144,64,153,1) 0%, rgba(97,85,163,1) 62%, rgba(52,139,201,1) 100%) !important;
+    background: linear-gradient(343deg, rgba(144,64,153,1) 0%, rgba(97,85,163,1) 62%, rgba(52,139,201,1) 100%) !important;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#904099",endColorstr="#348bc9",GradientType=1) !important;
+}
+
+.main-section-footer{
+    color: white !important;
+    border: 0px !important;
+}
+
+.main-section-content{
+    width:100% !important;
+    padding: 8px !important;
+    overflow-y: auto;
+}
+
+.refresh-section-icon{
+    float:right !important;
+    cursor: pointer;
+}
+
+.ui.inverted.table{
+    background-color: black;
+}
+
+.sidebar {
+    background: rgb(27,28,29) !important;
+    background: -moz-linear-gradient(90deg, rgba(27,28,29,1) 30%, rgba(54,56,57,1) 100%) !important;
+    background: -webkit-linear-gradient(90deg, rgba(27,28,29,1) 30%, rgba(54,56,57,1) 100%) !important;
+    background: linear-gradient(90deg, rgba(27,28,29,1) 30%, rgba(54,56,57,1) 100%) !important;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#1b1c1d",endColorstr="#363839",GradientType=1) !important;
+    border-right: 1px solid #666666 !important;
+}
+
+.bridge-claim-icon-container{
+    display:inline-table; 
+    background-color: rgba(144,64,153,1); 
+    border-radius:5px;
+}
+
+.neo-address-icon-container{
+    display:inline-table; 
+    background-color: #58bd00; 
+    border-radius:5px;
+}
+
+.bridge-application-icon-container{
+    display:inline-table; 
+    background-color:rgba(52,139,201,1);
+    border-radius:5px;
+}
+
+.blockchain-info{
+    width:100% !important;
+    font-size:11px !important;
+}
+
+.claim-info{
+    width:100% !important;
+    font-size:11px !important;
+}
+
+.application-info{
+    width:100% !important;
+    font-size:11px !important;
+}
+
+.view-key{
+    color: white !important;
+    background-color: #58bd00 !important; 
+    margin-left:6px !important;
+    padding:2px 6px 2px 6px !important;
+}
+
+.register-address{
+    color: white !important;
+    background-color: #58bd00 !important; 
+    margin-left:6px !important;
+    padding:2px 6px 2px 6px !important;
+}
+
+.modal-header{
+    font-size:1.1em !important;
+    background-color:#1b1c1d !important;
+    color: white !important;
+}
+
+#loading_spinner_message{
+    min-height:100px !important;
+    vertical-align: top;
+    color:white !important;
+    padding-top:60px !important;
+}
+
+.refresh-animation {
+    transition-duration: 2s;
+    transition-property: transform;
+    transform: rotate(360deg);
+    -webkit-transform: rotate(360deg);
+}

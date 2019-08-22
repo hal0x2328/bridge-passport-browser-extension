@@ -3,94 +3,81 @@
 
 <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="../styles/semantic/semantic.min.css">
-    <link href="../styles/popup.css" rel="stylesheet" />
-    <script src="../scripts/jquery/jquery-3.1.1.min.js"></script>
-    <script src="../scripts/chromeExtensionAsync-3.3.0/chrome-extension-async.js"></script>
-    <script src="../styles/semantic/semantic.min.js"></script>
-    <script src="../scripts/common.js"></script>
-    <script src="../scripts/popup-common.js"></script>
+    <link rel="stylesheet" type="text/css" href="/styles/semantic/semantic.min.css">
+    <link href="/styles/dialog.css" rel="stylesheet" />
+    <script src="/scripts/jquery/jquery-3.1.1.min.js"></script>
+    <script src="/scripts/chromeExtensionAsync-3.3.0/chrome-extension-async.js"></script>
+    <script src="/styles/semantic/semantic.min.js"></script>
+    <script src="/scripts/common.js"></script>
+    <script src="/scripts/popup-common.js"></script>
     <script src="./createpassport.js"></script>
 </head>
 
 <body>
-    <h5 class="ui header" style="background-color: white; padding:8px; margin-bottom:0px;">
-        <img src="../images/shared/bridge-token.png" style="width:15px; margin-left:10px; margin-top:-2px;">
-        <div class="content">
-            Create Bridge Passport
-            <div class="sub header"></div>
-        </div>
-        <a href="#" id="view_settings_button" style="float:right; color:purple; ">
-            <i class="icon cog"></i>
-        </a>
-    </h5>
-    <div id="content" class="ui inverted segment" style="background-color:transparent; margin:0px; height:445px;">
-        <div style="width:100%; text-align:center;">
-            <img src="../images/shared/bridge-white.png" style="width:300px; margin:50px;" />
-        </div>
-        <div id="import_passport_container">
-            <div class="ui form">
-                <div class="field" style="text-align:justify;">
-                    To create a new passport, specify your desired passphrase and confirm.
-                </div>
-                <div class="field">
-                    <div class="ui labeled input">
-                        <div class="ui label">
-                            Create Passphrase:
+    <a href="#" id="view_settings_button" class="settings-button"><i class="icon cog"></i></a>
+    <div class="ui middle aligned center aligned grid">
+        <div class="column">
+            <div class="ui segment inverted">
+                <img src="/images/shared/bridge-white.png" class="bridge-header-logo" />
+                <div id="import_passport_container">
+                    <div class="ui form">
+                        <div class="field" style="text-align:justify;">
+                            To create a new passport, specify your desired passphrase and confirm.
                         </div>
-                        <input id="create_passphrase" type="password" placeholder="">
-                    </div>
-                </div>
-                <div class="field">
-                    <div class="ui labeled input">
-                        <div class="ui label">
-                            Verify Passphrase:&nbsp;
+                        <div class="field">
+                            <input id="create_passphrase" type="password" placeholder="Create Passphrase">
                         </div>
-                        <input id="verify_passphrase" type="password" placeholder="">
+                        <div class="field">
+                            <input id="verify_passphrase" type="password" placeholder="Verify Passphrase">
+                        </div>
+                        <div class="ui accordion field" style="text-align:left; margin-top:-10px;">
+                            <div class="title" style="color:white;">
+                                <i class="dropdown icon"></i> <img src="/images/shared/neo-logo.png"
+                                    style="height:18px; padding-top:3px; margin-left:-4px; margin-right:4px; vertical-align: top;">
+                                NEO Wallet Options
+                            </div>
+                            <div class="content">
+                                <div class="field">
+                                    <label style="color:white;">Provide a private key to import an existing NEO wallet.
+                                        Leave blank to create a new wallet.</label>
+                                    <input id="neo_wif" type="text" placeholder="Private Key (WIF)">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <button id="create_passport_button" class="ui button purple">Create New Bridge
+                                Passport</button>
+                        </div>
+                        <div class="field">
+                            <a href="#" id="import_passport_link">Import a Passport ></a>
+                        </div>
                     </div>
-                </div>
-                <div class="field">
-                    <button id="create_passport_button" class="ui button purple">Create New Bridge Passport</button>
-                </div>
-                <div class="field" style="text-align:right;">
-                    <a href="#" id="import_passport_link" style="color:white;">Import a Passport ></a>
                 </div>
             </div>
         </div>
-        <div id="loading_spinner" class="ui active dimmer">
-            <div class="ui text loader"></div>
-            <img src="../images/shared/bridge-token.png" style="width:75px; margin-bottom:3px;">
-            <p id="loading_spinner_message">&nbsp;</p>
-        </div>
     </div>
-    <div id="settings_modal" class="ui modal">
-        <div class="header" style="font-size:0px;">
-            &nbsp;
+    <!-- Wait Dimmer -->
+    <div id="loading_spinner" class="ui active dimmer">
+            <div id="loading_spinner_message" class="ui text loader">Please wait</div>
+            <img src="/images/shared/bridge-token.png" style="width:75px; margin-top:-80px;">
+    </div>
+    <!-- End Wait Dimmer -->
+    <div id="settings_modal" class="ui tiny dark modal">
+        <div class="header inverted top aligned modal-header">
+            <img src="/images/shared/bridge-token.png"
+                style="width:30px; margin-top:-2px; margin-right:12px; float:left;" />
+            Bridge Network Settings
         </div>
         <div class="content">
             <div class="ui form">
-                <div class="field">
-                    <div class="ui toggle checkbox" style="display:none;">
-                        <input type="checkbox" id="lock_passport">
-                        <label>Never keep passport unlocked for browser session</label>
-                    </div>
-                </div>
                 <div id="advanced_settings_container">
                     <div class="field">
-                        <div class="ui labeled input" style="width:100%;">
-                            <div class="ui label" style="min-width:120px;">
-                                API Url
-                            </div>
-                            <input type="text" id="api_url">
-                        </div>
+                        <label>Bridge API Url</label>
+                        <input type="text" id="api_url">
                     </div>
                     <div class="field">
-                        <div class="ui labeled input" style="width:100%;">
-                            <div class="ui label" style="min-width:120px;">
-                                Explorer Url
-                            </div>
-                            <input type="text" id="explorer_url">
-                        </div>
+                        <label>Bridge Explorer Url</label>
+                        <input type="text" id="explorer_url">
                     </div>
                     <div class="field">
                         <a href="#" id="clear_cache_button" style="color:purple;">Clear Types and Partners Cache</a>
@@ -99,7 +86,7 @@
             </div>
         </div>
         <div class="actions">
-            <div id="ok_button" class="ui button cancel">OK</div>
+            <div id="ok_button" class="ui button purple cancel">OK</div>
         </div>
     </div>
 </body>

@@ -3,7 +3,7 @@ Do Not Translate or Localize
 
 
 --------------------------------------------------------------------------------
-@cityofzion/neon-js v3.11.9 - Ethan Fast
+@cityofzion/neon-js v4.7.0 - Yak Jun Xiang
 git+https://github.com/CityOfZion/neon-js.git
 --------------------------------------------------------------------------------
 
@@ -38,8 +38,8 @@ git+ssh://git@github.com/indutny/asn1.js.git
 MIT
 
 --------------------------------------------------------------------------------
-assert v1.4.1
-git://github.com/defunctzombie/commonjs-assert.git
+assert v1.5.0
+git://github.com/browserify/commonjs-assert.git
 --------------------------------------------------------------------------------
 
 Copyright Joyent, Inc. and other Node contributors. All rights reserved.
@@ -63,13 +63,13 @@ IN THE SOFTWARE.
 
 
 --------------------------------------------------------------------------------
-base64-js v1.3.0 - T. Jameson Little
+base64-js v1.3.1 - T. Jameson Little
 git://github.com/beatgammit/base64-js.git
 --------------------------------------------------------------------------------
 
 The MIT License (MIT)
 
-Copyright (c) 2014
+Copyright (c) 2014 Jameson Little
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -91,7 +91,7 @@ THE SOFTWARE.
 
 
 --------------------------------------------------------------------------------
-bn v1.0.3 - Thomas Wu
+bn v1.0.4 - Thomas Wu
 git://github.com/keybase/bn.git
 --------------------------------------------------------------------------------
 
@@ -788,44 +788,36 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 
 --------------------------------------------------------------------------------
-ieee754 v1.1.12 - Feross Aboukhadijeh
+ieee754 v1.1.13 - Feross Aboukhadijeh
 git://github.com/feross/ieee754.git
 --------------------------------------------------------------------------------
 
-Copyright (c) 2008, Fair Oaks Labs, Inc.
-All rights reserved.
+Copyright 2008 Fair Oaks Labs, Inc.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
 
-* Redistributions of source code must retain the above copyright notice,
-this list of conditions and the following disclaimer.
+1. Redistributions of source code must retain the above copyright notice, this
+list of conditions and the following disclaimer.
 
-* Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
+2. Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation and/or
+other materials provided with the distribution.
 
-* Neither the name of Fair Oaks Labs, Inc. nor the names of its contributors
-may be used to endorse or promote products derived from this software
-without specific prior written permission.
+3. Neither the name of the copyright holder nor the names of its contributors
+may be used to endorse or promote products derived from this software without
+specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
-LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-
-
---------------------------------------------------------------------------------
-indexof v0.0.1
---------------------------------------------------------------------------------
-
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 --------------------------------------------------------------------------------
@@ -859,7 +851,7 @@ git://github.com/juliangruber/isarray.git
 MIT
 
 --------------------------------------------------------------------------------
-kbpgp v2.1.0 - Maxwell Krohn
+kbpgp v2.1.3 - Maxwell Krohn
 git://github.com/keybase/kbpgp.git
 --------------------------------------------------------------------------------
 
@@ -900,7 +892,7 @@ git+https://github.com/cryptocoinjs/ecurve.git
 
 
 --------------------------------------------------------------------------------
-keybase-nacl v1.1.0 - Maxwell Krohn
+keybase-nacl v1.1.1 - Maxwell Krohn
 github.com/keybase/node-nacl
 --------------------------------------------------------------------------------
 
@@ -1023,7 +1015,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 --------------------------------------------------------------------------------
-node-fetch v2.3.0 - David Frank
+node-fetch v2.6.0 - David Frank
 git+https://github.com/bitinn/node-fetch.git
 --------------------------------------------------------------------------------
 
@@ -1052,7 +1044,7 @@ SOFTWARE.
 
 
 --------------------------------------------------------------------------------
-node-libs-browser v2.2.0 - Tobias Koppers @sokra
+node-libs-browser v2.2.1 - Tobias Koppers @sokra
 git+https://github.com/webpack/node-libs-browser.git
 --------------------------------------------------------------------------------
 
@@ -1078,6 +1070,34 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+--------------------------------------------------------------------------------
+object-assign v4.1.1 - Sindre Sorhus
+git+https://github.com/sindresorhus/object-assign.git
+--------------------------------------------------------------------------------
+
+The MIT License (MIT)
+
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
 
 
 --------------------------------------------------------------------------------
@@ -1220,7 +1240,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 --------------------------------------------------------------------------------
-process-nextick-args v2.0.0
+process-nextick-args v2.0.1
 git+https://github.com/calvinmetcalf/process-nextick-args.git
 --------------------------------------------------------------------------------
 
@@ -1610,7 +1630,7 @@ IN THE SOFTWARE.
 
 
 --------------------------------------------------------------------------------
-timers-browserify v2.0.10 - J. Ryan Stinnett
+timers-browserify v2.0.11 - J. Ryan Stinnett
 git://github.com/jryans/timers-browserify.git
 --------------------------------------------------------------------------------
 
@@ -1754,7 +1774,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 
 --------------------------------------------------------------------------------
-vm-browserify v0.0.4 - James Halliday
+vm-browserify v1.1.0 - James Halliday
 git+ssh://git@github.com/substack/vm-browserify.git
 --------------------------------------------------------------------------------
 
@@ -1779,7 +1799,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 --------------------------------------------------------------------------------
-webpack v4.29.6 - Tobias Koppers @sokra
+webpack v4.39.2 - Tobias Koppers @sokra
 git+https://github.com/webpack/webpack.git
 --------------------------------------------------------------------------------
 

@@ -3,19 +3,24 @@
 
 <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="../styles/semantic/semantic.min.css">
-    <link href="../styles/popup.css" rel="stylesheet" />
-    <script src="../scripts/jquery/jquery-3.1.1.min.js"></script>
-    <script src="../styles/semantic/semantic.min.js"></script>
-    <script src="../scripts/chromeExtensionAsync-3.3.0/chrome-extension-async.js"></script>
-    <script src="../scripts/common.js"></script>
-    <script src="../scripts/popup-common.js"></script>
+    <link rel="stylesheet" type="text/css" href="/styles/semantic/semantic.min.css">
+    <link href="/styles/dialog.css" rel="stylesheet" />
+    <script src="/scripts/jquery/jquery-3.1.1.min.js"></script>
+    <script src="/styles/semantic/semantic.min.js"></script>
+    <script src="/scripts/chromeExtensionAsync-3.3.0/chrome-extension-async.js"></script>
+    <script src="/scripts/common.js"></script>
+    <script src="/scripts/popup-common.js"></script>
     <script src="./loginpassport.js"></script>
 </head>
 
 <body>
+        <div class="ui middle aligned center aligned grid">
+                <div class="column">
+
+                </div>
+        </div>
     <h5 class="ui header" style="background-color: white; padding:8px;">
-        <img src="../images/shared/bridge-token.png" style="width:25px;">
+        <img src="/images/shared/bridge-token.png" style="width:25px;">
         <div class="content">
             Authenticate with Bridge Passport
             <div class="sub header"></div>
@@ -23,7 +28,7 @@
     </h5>
     <div id="content" class="ui inverted segment" style="min-height:200px; background-color:transparent; display:none;">
         <div style="width:100%; text-align:center; margin:10px;">
-            <img src="../images/shared/bridge-white.png" style="width:300px;" />
+            <img src="/images/shared/bridge-white.png" style="width:300px;" />
         </div>
         <div id="passport_details_container" class="ui inverted segment" style="text-align:left; min-height: 130px;">
             <div id="login_requester">
@@ -64,11 +69,12 @@
         </div>
         <button id="login_button" class="ui button purple">Login with Passport</button>
     </div>
+    <!-- Wait Dimmer -->
     <div id="loading_spinner" class="ui active dimmer">
-        <div class="ui text loader"></div>
-        <img src="../images/shared/bridge-token.png" style="width:75px; margin-bottom:3px;">
-        <p id="loading_spinner_message">&nbsp;</p>
+            <div id="loading_spinner_message" class="ui text loader">Please wait</div>
+            <img src="/images/shared/bridge-token.png" style="width:75px; margin-top:-80px;">
     </div>
+    <!-- End Wait Dimmer -->
 </body>
 
 </html>

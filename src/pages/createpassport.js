@@ -27,9 +27,9 @@ $(function () {
         showWait("Creating Bridge Passport...");
         setTimeout(async function () {
             try {
-                var passport = await createPassport(passphrase);
+                var passport = await createPassport(passphrase, $("#neo_wif").val(), true);
                 if (passport) {
-                    loadPage("passportdetails");
+                    loadPage("main");
                 }
                 else {
                     alert("Could not create passport");
@@ -61,6 +61,7 @@ $(function () {
         await saveSettings(_settings);
     });
 
+    $('.ui.accordion').accordion();
     hideWait();
 });
 

@@ -1,0 +1,245 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="/styles/semantic/semantic.min.css">
+    <link href="/styles/main.css" rel="stylesheet" />
+    <script src="/scripts/jquery/jquery-3.1.1.min.js"></script>
+    <script src="/styles/semantic/semantic.min.js"></script>
+    <script src="/scripts/chromeExtensionAsync-3.3.0/chrome-extension-async.js"></script>
+    <script src="/scripts/common.js"></script>
+    <script src="/scripts/popup-common.js"></script>
+    <script src="/scripts/bridgeprotocol.min.js"></script>
+    <script src="./main.js"></script>
+</head>
+
+<body>
+    <div class="ui vertical inverted menu labeled icon visible sidebar" style="border-right:1px solid #aaaaaa;">
+        <a class="item" id="bridge_button" style="text-align:center;">
+            <img src="/images/shared/bridge-logo.png" style="width:80px;">
+        </a>
+        <a class="item" id="export_button">
+            <i class="download icon"></i>
+            Backup
+        </a>
+        <a class="item" id="settings_button">
+            <i class="cog icon"></i>
+            Settings
+        </a>
+        <a class="item" id="logout_button">
+            <i class="power off icon"></i>
+            Logout
+        </a>
+    </div>
+    <div class="pusher" style="padding-left:108px; height:100%;">
+        <table class="ui inverted very compact basic table top attached" style="width:100%; height:100%;">
+            <tbody>
+                <tr>
+                    <td style="width:50%;" rowspan=2>
+                        <div class="ui inverted segment main-section">
+                            <div class="ui top attached segment main-section-header">
+                                Passport Information
+                                <i id="refresh_passport_button" class="ui icon redo refresh-section-icon"></i>
+                            </div>
+                            <div class="ui top attached container main-section-content form">
+                                <div class="field">
+                                    <label style="color:white;">Bridge Passport ID</label>
+                                    <div class="ui labeled input" style="width:100%;">
+                                        <input type="text" id="passport_id" style="font-size:12px; padding: 11px;"
+                                            readonly>
+                                        <div id="copy_passport_id_label" class="ui corner label">
+                                            <a id="copy_passport_id"
+                                                data-content="Bridge Passport Id Copied to Clipboard"
+                                                style="cursor:pointer;">
+                                                <i class="copy icon" style="cursor:pointer;"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <label style="color:white;">Verified Information</label>
+                                    <div id="claims_list">No verified information found.</div>
+                                </div>
+                            </div>
+                            <div class="main-section-footer">
+                                <button id="unload_button" class="ui button purple" type="button">Unload
+                                    Passport</button>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="width:50%; height:50%;">
+                        <div class="top attached ui inverted segment main-section">
+                            <div class="ui top attached segment main-section-header">
+                                Blockchain Addresses
+                                <i id="refresh_blockchain_button" class="ui icon redo refresh-section-icon"></i>
+                            </div>
+                            <div class="ui top attached container main-section-content" id="blockchain_list">
+                                No blockchain addresses found
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:50%; height:50%;">
+                        <div class="top attached ui inverted segment main-section">
+                            <div class="ui top attached segment main-section-header">
+                                Recent Verifications
+                                <i id="refresh_verifications_button" class="ui icon redo refresh-section-icon"></i>
+                            </div>
+                            <div class="ui top attached container main-section-content" id="verification_request_list">
+                                No active verifications found
+                            </div>
+                            <div class="main-section-footer">
+                                <button class="ui button purple" type="button">Create Verification Request</button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Wait Dimmer -->
+    <div id="loading_spinner" class="ui active dimmer">
+        <div id="loading_spinner_message" class="ui text loader">Please wait</div>
+        <img src="/images/shared/bridge-token.png" style="width:75px; margin-top:-80px;">
+    </div>
+    <!-- End Wait Dimmer -->
+
+    <!-- Content Templates -->
+    <div style="display:none;">
+        <div class="ui segment claim-template" style="padding:2px; margin:2px;">
+            <div class="bridge-claim-icon-container">
+                <img src="/images/shared/bridge-token-white.png" style="width:34px; margin:10px;">
+            </div>
+            <div style="display:inline-table; vertical-align:top; margin-left:4px;">
+                <div class="claim-info claim-name"></div>
+                <div class="claim-info claim-expires"></div>
+                <div class="claim-info claim-signature">Verified By: <span class="claim-signature-link"></span></div>
+            </div>
+        </div>
+        <div class="ui segment application-template" style="padding:2px; margin:2px;">
+            <div class="bridge-application-icon-container">
+                <img src="/images/shared/bridge-token-white.png" style="width:34px; margin:10px;">
+            </div>
+            <div style="display:inline-table; vertical-align:top; margin-left:4px;">
+                <div class="application-info application-created"></div>
+                <div class="application-info application-status"></div>
+                <div class="application-info application-partner"></div>       
+            </div>
+        </div>
+        <div class="ui segment blockchain-template" style="padding:2px; margin:2px;">
+            <div class="neo-address-icon-container">
+                <img src="/images/shared/neo-logo-white.png" style="width:34px; margin:12px 10px 8px 10px;">
+            </div>
+            <div style="display:inline-table; vertical-align:top; margin-left:4px;">
+                <div class="blockchain-info">
+                    <b>Address</b>:
+                    <span class="blockchain-address"></span>
+                    <a href='#' class='ui button view-key'>View Key</a>
+                </div>
+                <div class="blockchain-info">
+                    Balances:
+                    <span>
+                        <img src="/images/shared/neo-logo.png"
+                            style="width:15px; margin-right:5px; vertical-align: middle;">GAS: <span
+                            class="neo-gas-balance">0</span>
+                    </span>
+                    <span style="margin-left:10px;">
+                        <img src="/images/shared/bridge-token.png"
+                            style="width:15px; margin-right:5px; vertical-align: middle;">BRDG: <span
+                            class="neo-brdg-balance">0</span>
+                    </span>
+                </div>
+                <div class="blockchain-info">
+                    Registered:
+                    <span id="blockchain-registered">
+                        <span class="blockchain-registered">No
+                            <a href="#" class="ui button register-address">Register Address</a>
+                        </span>
+                    </span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- End Content Templates -->
+
+    <!-- Modals -->
+    <div id="settings_modal" class="ui tiny dark modal">
+        <div class="header inverted top aligned modal-header">
+            <img src="/images/shared/bridge-token.png"
+                style="width:30px; margin-top:-2px; margin-right:12px; float:left;" />
+            Bridge Network Settings
+        </div>
+        <div class="content">
+            <div class="ui form">
+                <div id="advanced_settings_container">
+                    <div class="field">
+                        <label>Bridge Api Url</label>
+                        <input type="text" id="api_url">
+                    </div>
+                    <div class="field">
+                        <label>Bridge Explorer Url</label>
+                        <input type="text" id="explorer_url">
+                    </div>
+                    <div class="field">
+                        <a href="#" id="clear_cache_button" style="color:purple;">Clear Types and Partners Cache</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="actions">
+            <div id="save_settings_button" class="ui button purple cancel">OK</div>
+        </div>
+    </div>
+
+    <div id="key_modal" class="ui tiny modal">
+        <div class="header inverted top aligned modal-header">
+            <img src="/images/shared/bridge-token.png"
+                style="width:30px; margin-top:-2px; margin-right:12px; float:left;" />
+            Private Key
+        </div>
+        <div class="content">
+            <div class="ui labeled input" style="width:100%;">
+                <input type="text" id="wif_value" style="font-size:12px; padding: 11px;" readonly>
+                <div id="copy_wif_label" class="ui corner label">
+                    <a id="copy_wif" data-content="Private Key Copied to Clipboard" style="cursor:pointer;">
+                        <i class="copy icon" style="cursor:pointer;"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="actions">
+            <div id="ok_button" class="ui button purple cancel">OK</div>
+        </div>
+    </div>
+
+    <div id="unlock_passport_modal" class="ui tiny modal">
+        <div class="header inverted top aligned modal-header">
+            <img src="/images/shared/bridge-token.png"
+                style="width:30px; margin-top:-2px; margin-right:12px; float:left;" />
+            Bridge Passport Locked
+        </div>
+        <div class="content">
+            <div class="ui form">
+                <div class="field" style="text-align:justify;">
+                    To unlock the passport, provide your passphrase.
+                </div>
+                <div class="field">
+                    <input id="unlock_passphrase" type="password" placeholder="Bridge Passport Passphrase">
+                    <div id="error" class="error"></div>
+                </div>
+            </div>
+        </div>
+        <div class="actions" style="padding:0px; width:100%;">
+            <button id="unlock_passport_button" class="ui button purple" style="margin:0px;">Unlock Bridge
+                Passport</button>
+        </div>
+    </div>
+    <!-- End Modals -->
+
+</body>
+
+</html>

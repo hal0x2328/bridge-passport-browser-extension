@@ -4,15 +4,39 @@ async function wait(ms) {
   });
 }
 
-async function createPassport(passphrase) {
+async function createPassport(passphrase, neoWif, autoCreate) {
   let passportHelper = new BridgeProtocol.Passport();
-  let passport = await passportHelper.createPassport(passphrase);
+  let passport = await passportHelper.createPassport(passphrase, neoWif, autoCreate);
   if (passport) {
     _passphrase = passphrase;
     _passport = passport;
+
+    console.log("Created Passport: " + JSON.stringify(_passport));
+    console.log("Public Key:" + _passport.publicKey);
+    
     await savePassportToBrowserStorage(_passport);
   }
   return passport;
+}
+
+async function getPassport(){
+  //We don't even have raw unlocked content loaded, we shouldn't get here
+  if(!_passport){
+    return null;
+  }
+
+  //We don't have a valid passport object that's unlocked
+  if(!_passport.publicKey){
+      //Otherwise we need to unlock it
+      console.log("Passport Content: " + JSON.stringify(_passport));
+      console.log("Key:" + _passport.publicKey);
+      let passportHelper = new BridgeProtocol.Passport(_settings.apiBaseUrl, _passport, _passphrase);
+      let passport = await passportHelper.loadPassportFromContent(JSON.stringify(_passport), _passphrase);
+      console.log("Passport Object: " + JSON.stringify(passport));
+      console.log("Key:" + passport.publicKey);
+  }
+
+  return _passport;
 }
 
 async function getPassportDetails() {
@@ -51,6 +75,9 @@ async function unlockPassport(passphrase) {
 
     _passphrase = passphrase;
     _passport = passport;
+
+    console.log("Unlocked Passport: " + JSON.stringify(_passport));
+    console.log("Public Key:" + _passport.publicKey);
   }
 
   return passport;
@@ -93,7 +120,6 @@ async function removePassport() {
 }
 
 async function closePassport() {
-  _passport = null;
   _passphrase = null;
 }
 

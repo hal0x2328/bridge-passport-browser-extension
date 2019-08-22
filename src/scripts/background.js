@@ -1,7 +1,7 @@
 var _settings = {
   lockPassport: false,
-  apiBaseUrl: "https://api.bridgeprotocol.io/",
-  explorerBaseUrl: "https://explorer.bridgeprotocol.io/",
+  apiBaseUrl: "https://app.bridgeprotocol.io/api",
+  explorerBaseUrl: "https://app.bridgeprotocol.io/explorer",
 }
 
 //Cached passport
@@ -87,11 +87,12 @@ _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) 
   }
 
   if (request.action == "getPassport") {
-    sendResponse(_passport);
+    getPassport().then(sendResponse);
+    return true;
   }
 
   if (request.action == "createPassport") {
-    createPassport(request.passphrase).then(sendResponse);
+    createPassport(request.passphrase, request.neoWif, request.autoCreate).then(sendResponse);
     return true;
   }
 

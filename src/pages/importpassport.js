@@ -21,7 +21,7 @@ $(function () {
             try {
                 var passport = await importPassport(_passportContent, passphrase);
                 if (passport) {
-                    loadPage("passportdetails");
+                    loadPage("main");
                 }
                 else {
                     $("#error").text("Invalid passphrase.");
