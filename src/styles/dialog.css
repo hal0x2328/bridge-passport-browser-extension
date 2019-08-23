@@ -37,7 +37,8 @@ html, body {
   }
 
   .modal-header{
-    font-size:1.2em;
+    padding: 1em !important;
+    font-size:1.1em !important;
     background-color:#1b1c1d !important;
     color: white !important;
   }

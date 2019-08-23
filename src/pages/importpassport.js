@@ -1,8 +1,11 @@
 var _passportContent;
+var _param;
 
 $(function () {
+    _param = getParamFromLocation();
+    
     $("#create_passport_link").click(function () {
-        loadPage("createpassport");
+        loadPage("createpassport",_param);
     });
 
     $("#import_passport_button").click(function () {
@@ -21,7 +24,7 @@ $(function () {
             try {
                 var passport = await importPassport(_passportContent, passphrase);
                 if (passport) {
-                    loadPage("main");
+                    loadPage("main",_param);
                 }
                 else {
                     $("#error").text("Invalid passphrase.");

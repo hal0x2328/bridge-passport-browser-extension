@@ -19,27 +19,67 @@ var popupWindowId = false;
 var windowNotOpenTitle = 'Open Bridge Passport';
 var windowIsOpenTitle = 'Bridge Passport is already open. Click to focus popup.';
 
-function openPopup(url, windowSize) {
+function openPopup(pageName, param) {
+  //Default to main
+  if (!pageName)
+    pageName = "main";
+
+  //Set the window size
+  let height = screen.height * .80;
+  let width = screen.width * .50;
+  let left = window.screenX;
+  let top = window.screenY;
+
+  if (height < 1024)
+    height = screen.height;
+  else if (height > 1024)
+    height = 1024;
+
+  if (width < 1280)
+    width = screen.width;
+  else if (width > 1280)
+    width = 1280;
+
+  //Shift the window over by the width
+  if(window.screenX > width){
+    left = window.screenX - width;
+  }
+  
+  let windowSize = {
+    height,
+    width,
+    left,
+    top
+  };
+  
+  let url = _browser.extension.getURL("/pages/" + pageName + ".html");
+  if (param)
+    url = url + "?p=" + param;
+
+  console.log("Opening Passport window: " + JSON.stringify({ url, windowSize }));
+
+  if (typeof popupWindowId === 'number') {
+    console.log("Passport window already open, focusing");
+    _browser.windows.remove(popupWindowId);
+    popupWindowId = false;
+  }
+  
   if (popupWindowId === false) {
     popupWindowId = true; //Prevent user pressing pressing the button multiple times.
-
     _browser.browserAction.setTitle({ title: windowIsOpenTitle });
-    _browser.windows.create({
-      url,
-      type: 'popup',
-      width: windowSize.width,
-      height: windowSize.height,
-      left: windowSize.left,
-      top: windowSize.top
-    },
+    _browser.windows.create(
+      {
+        url,
+        type: 'popup',
+        width: windowSize.width,
+        height: windowSize.height,
+        left: windowSize.left,
+        top: windowSize.top
+      },
       function (win) {
         popupWindowId = win.id;
-      });
-  }
-  else if (typeof popupWindowId === 'number') {
-    //hack to force a redraw so we don't lose the background image
-    _browser.windows.update(popupWindowId, { focused: true });
-    _browser.windows.update(popupWindowId, { width: windowSize.width, height: windowSize.height, left: windowSize.left, top: windowSize.top });
+      }
+    );
   }
 
   return;
@@ -58,8 +98,20 @@ _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) 
   if (request.target != 'background')
     return;
 
+  if (request.action == "login") {
+    console.log("login request received");
+    openPopup("main", "login");
+    return;
+  }
+
+  if (request.action == "payment") {
+    console.log("payment request received");
+    openPopup("main", "payment");
+    return;
+  }
+
   if (request.action == "openPopup") {
-    openPopup(request.url, request.windowSize);
+    openPopup(request.pageName, request.param);
     return;
   }
 
@@ -101,7 +153,7 @@ _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) 
     return true;
   }
 
-  if(request.action == "getPassportIdForPublicKey"){
+  if (request.action == "getPassportIdForPublicKey") {
     getPassportIdForPublicKey(request.publicKey).then(sendResponse);
     return true;
   }
@@ -131,7 +183,7 @@ _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) 
     return true;
   }
 
-  if(request.action == "getBridgePassportId"){
+  if (request.action == "getBridgePassportId") {
     getBridgePassportId().then(sendResponse);
     return true;
   }
@@ -156,12 +208,12 @@ _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) 
     return true;
   }
 
-  if(request.action == "updateApplicationTransaction"){
+  if (request.action == "updateApplicationTransaction") {
     updateApplicationTransaction(request.applicationId, request.network, request.transactionId).then(sendResponse);
     return true;
   }
 
-  if(request.action == "resendApplication"){
+  if (request.action == "resendApplication") {
     resendApplication(request.applicationId).then(sendResponse);
     return true;
   }
@@ -196,7 +248,7 @@ _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) 
     return true;
   }
 
-  if(request.action == "getNetworkFee"){
+  if (request.action == "getNetworkFee") {
     getNetworkFee().then(sendResponse);
     return true;
   }

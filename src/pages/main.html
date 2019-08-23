@@ -59,11 +59,12 @@
                                 </div>
                                 <div class="field">
                                     <label style="color:white;">Verified Information</label>
-                                    <div id="claims_list">No verified information found.</div>
+                                    <div id="claims_list"></div>
                                 </div>
                             </div>
                             <div class="main-section-footer">
-                                <button id="unload_button" class="ui button purple" type="button">Unload
+                                <button id="unload_button" class="ui button purple" type="button"
+                                    style="display:none;">Unload
                                     Passport</button>
                             </div>
                         </div>
@@ -75,7 +76,7 @@
                                 <i id="refresh_blockchain_button" class="ui icon redo refresh-section-icon"></i>
                             </div>
                             <div class="ui top attached container main-section-content" id="blockchain_list">
-                                No blockchain addresses found
+
                             </div>
                         </div>
                     </td>
@@ -88,10 +89,11 @@
                                 <i id="refresh_verifications_button" class="ui icon redo refresh-section-icon"></i>
                             </div>
                             <div class="ui top attached container main-section-content" id="verification_request_list">
-                                No active verifications found
+
                             </div>
                             <div class="main-section-footer">
-                                <button class="ui button purple" type="button">Create Verification Request</button>
+                                <button id="create_verification_request_button" class="ui button purple"
+                                    style="display:none;" type="button">Create Verification Request</button>
                             </div>
                         </div>
                     </td>
@@ -126,7 +128,7 @@
             <div style="display:inline-table; vertical-align:top; margin-left:4px;">
                 <div class="application-info application-created"></div>
                 <div class="application-info application-status"></div>
-                <div class="application-info application-partner"></div>       
+                <div class="application-info application-partner"></div>
             </div>
         </div>
         <div class="ui segment blockchain-template" style="padding:2px; margin:2px;">
@@ -167,10 +169,37 @@
     <!-- End Content Templates -->
 
     <!-- Modals -->
+    <div id="login_modal" class="ui  modal">
+        <div class="header inverted top aligned modal-header">
+            <img class="modal-header-image" src="/images/shared/bridge-token.png" />
+            Login with Bridge Passport
+        </div>
+        <div class="content">
+            Login Request...
+        </div>
+        <div class="actions">
+            <div id="login_cancel_button" class="ui button cancel">Cancel</div>
+            <div id="login_ok_button" class="ui button purple cancel">Login with Bridge Passport</div>
+        </div>
+    </div>
+
+    <div id="payment_modal" class="ui  modal">
+        <div class="header inverted top aligned modal-header">
+            <img class="modal-header-image" src="/images/shared/bridge-token.png" />
+            Payment Request
+        </div>
+        <div class="content">
+            Payment Request...
+        </div>
+        <div class="actions">
+            <div id="payment_cancel_button" class="ui button cancel">Cancel</div>
+            <div id="payment_ok_button" class="ui button purple cancel">Make Paymennt</div>
+        </div>
+    </div>
+
     <div id="settings_modal" class="ui tiny dark modal">
         <div class="header inverted top aligned modal-header">
-            <img src="/images/shared/bridge-token.png"
-                style="width:30px; margin-top:-2px; margin-right:12px; float:left;" />
+            <img class="modal-header-image" src="/images/shared/bridge-token.png" />
             Bridge Network Settings
         </div>
         <div class="content">
@@ -184,9 +213,6 @@
                         <label>Bridge Explorer Url</label>
                         <input type="text" id="explorer_url">
                     </div>
-                    <div class="field">
-                        <a href="#" id="clear_cache_button" style="color:purple;">Clear Types and Partners Cache</a>
-                    </div>
                 </div>
             </div>
         </div>
@@ -197,8 +223,7 @@
 
     <div id="key_modal" class="ui tiny modal">
         <div class="header inverted top aligned modal-header">
-            <img src="/images/shared/bridge-token.png"
-                style="width:30px; margin-top:-2px; margin-right:12px; float:left;" />
+            <img class="modal-header-image" src="/images/shared/bridge-token.png" />
             Private Key
         </div>
         <div class="content">
@@ -218,8 +243,7 @@
 
     <div id="unlock_passport_modal" class="ui tiny modal">
         <div class="header inverted top aligned modal-header">
-            <img src="/images/shared/bridge-token.png"
-                style="width:30px; margin-top:-2px; margin-right:12px; float:left;" />
+            <img class="modal-header-image" src="/images/shared/bridge-token.png" />
             Bridge Passport Locked
         </div>
         <div class="content">
@@ -234,7 +258,7 @@
             </div>
         </div>
         <div class="actions" style="padding:0px; width:100%;">
-            <button id="unlock_passport_button" class="ui button purple" style="margin:0px;">Unlock Bridge
+            <button id="unlock_passport_button" class="ui button purple" style="margin:0px; margin-bottom:-1px;">Unlock Bridge
                 Passport</button>
         </div>
     </div>

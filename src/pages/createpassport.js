@@ -1,11 +1,15 @@
+var _param;
+
 $(function () {
+    _param = getParamFromLocation();
+
     $("#create_passport_link").click(function () {
         $("#create_passport_container").show();
         $("#import_passport_container").hide();
     });
 
     $("#import_passport_link").click(function () {
-        loadPage("importpassport");
+        loadPage("importpassport",_param);
     });
 
     $("#create_passport_button").click(async function () {
@@ -29,7 +33,7 @@ $(function () {
             try {
                 var passport = await createPassport(passphrase, $("#neo_wif").val(), true);
                 if (passport) {
-                    loadPage("main");
+                    loadPage("main", _param);
                 }
                 else {
                     alert("Could not create passport");

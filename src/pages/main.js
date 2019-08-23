@@ -1,6 +1,7 @@
 var _passport;
 var _passphrase;
 var _settings;
+var _param;
 
 //Templates
 var _claimTemplate;
@@ -12,45 +13,38 @@ $(function () {
 });
 
 async function Init() {
-    var params = getParamsFromLocation();
-    //if(await checkPassportLogin()){
-    //    return;
-    //}
-
+    _param = getParamFromLocation();
     _settings = await getSettings();
     _passport = await getPassport();
     _passphrase = await getPassphrase();
 
     if (!_passphrase && _passport) {
         await initUnlock();
-        $("#unlock_passport_modal").modal({closable: false}).modal("show");
+        $("#unlock_passport_modal").modal({ closable: false }).modal("show");
         return;
     }
 
-    //if(await checkPassportLogin()){
-    //    return;
-    //}
-    //if(await checkPassportPayment()){
-    //    return;
-    //};
-
-    if (!_passport) 
-    { //If we can't, it means we don't have one loaded
-        loadPage("createpassport");
+    if (!_passport) { //If we can't, it means we don't have one loaded
+        loadPage("createpassport", _param);
         return;
     }
 
     initSidebar();
     await initPassportDetails();
+    await initVerifications();
     await initClaims();
     await initBlockchainAddresses();
-    await initVerifications();
     initSettings();
     initUI();
     hideWait();
+
+    if (_param == "login") {
+        $("#login_modal").modal({ closable: false }).modal("show");
+    }
+    else if (_param == "payment") {
+        $("#payment_modal").modal({ closable: false }).modal("show");
+    }
 }
-
-
 
 async function initUI() {
     $(".ui.accordion").accordion();
@@ -72,6 +66,10 @@ async function initUI() {
         await initVerifications();
     });
 
+    //show the buttons
+    $("#unload_button").show();
+    $("#create_verification_request_button").show();
+
     //Set content heights
     $(".main-section").each(function () {
         let containerHeight = $(this).outerHeight();
@@ -81,7 +79,7 @@ async function initUI() {
         $(this).find(".main-section-content").outerHeight(contentHeight);
     });
 
-    $(".refresh-section-icon").click(function(){
+    $(".refresh-section-icon").click(function () {
         showRefreshSectionProgress(this);
     });
 }
@@ -91,7 +89,7 @@ async function initPassportDetails() {
         return;
 
     //We don't have a valid passport object that's unlocked
-    if(!_passport.publicKey){
+    if (!_passport.publicKey) {
         let passportHelper = new BridgeProtocol.Passport(_settings.apiBaseUrl, _passport, _passphrase);
         _passport = await passportHelper.loadPassportFromContent(JSON.stringify(_passport), _passphrase);
     }
@@ -101,7 +99,7 @@ async function initPassportDetails() {
 
     $("#unload_button").click(async function () {
         await removePassport();
-        loadPage("createpassport");
+        loadPage("createpassport", _param);
     });
 
     $("#copy_passport_id").popup({ on: 'click' });
@@ -135,9 +133,12 @@ async function initClaims() {
         if (claims && claims.length > 0) {
             $("#claims_list").empty();
             for (let i = 0; i < claims.length; i++) {
-                claims[i].signedById = await getPassportIdForPublicKey(claims[i].signedByKey);
                 $("#claims_list").append(getClaimItem(claims[i]));
             }
+        }
+        else {
+            $("#claims_list").empty();
+            $("#claims_list").text("No verified information found");
         }
         hideRefreshSectionProgress($("#refresh_passport_button"));
         resolve();
@@ -189,6 +190,10 @@ async function initBlockchainAddresses() {
                 $("#blockchain_list").append(item);
             }
         }
+        else {
+            $("#blockchain_list").empty();
+            $("#blockchain_list").text("No blockchain addresses found");
+        }
 
         $("#copy_wif").popup({ on: 'click' });
         $("#copy_wif").click(function () {
@@ -220,7 +225,7 @@ function initUnlock() {
             try {
                 var passport = await unlockPassport(passphrase);
                 if (passport) {
-                    loadPage("main");
+                    loadPage("main", _param);
                 }
                 else {
                     $("#error").text("Invalid passphrase.");
@@ -238,32 +243,45 @@ function initUnlock() {
 async function initVerifications() {
     return new Promise(async (resolve, reject) => {
         _applicationTemplate = $(".application-template").first();
-        let applicationHelper = new BridgeProtocol.Application(_settings.apiBaseUrl, _passport, _passphrase);
-        let applications = await applicationHelper.getActiveApplications();
-        console.log(JSON.stringify(applications));
-        if (applications) {
-            if(applications && applications.length > 0){
+        let res = await getApplications();
+        if(res.error){
+            $("#create_verification_request_button").prop('disabled', true);
+        }
+        console.log(JSON.stringify(res));
+
+        if (res.applications) {
+            if (res.applications && res.applications.length > 0) {
                 $("#verification_request_list").empty();
             }
-            for (let i = 0; i < applications.length; i++) {
-                var item = getApplicationItem(applications[i]);
+            else{
+                $("#verification_request_list").empty();
+                $("#verification_request_list").text("No active verifications found");
+            }
+
+            for (let i = 0; i < res.applications.length; i++) {
+                var item = getApplicationItem(res.applications[i]);
                 $("#verification_request_list").append(item);
             }
         }
+        else if(res.error)
+        {
+            $("#verification_request_list").empty();
+            $("#verification_request_list").text("Error connecting to Bridge public api. Verification requests are unavailable.");
+        }
+
         hideRefreshSectionProgress($("#refresh_verifications_button"));
         resolve();
     });
 }
 
-function getApplicationItem(application)
-{
+function getApplicationItem(application) {
     var applicationItem = $(_applicationTemplate).clone();
     var link = $(applicationItem).find(".application-link");
-    link.click(function(){
+    link.click(function () {
         loadPage("verificationdetails", application.id);
     })
     $(applicationItem).find(".application-status").text("Status: " + makeStringReadable(application.status));
-    $(applicationItem).find(".application-partner").text("Partner: " + application.verificationPartner);
+    $(applicationItem).find(".application-partner").text("Partner: " + application.verificationPartnerName);
     var createdDate = new Date(application.createdOn * 1000);
     var created = createdDate.toLocaleDateString() + " " + createdDate.toLocaleTimeString();
     $(applicationItem).find(".application-created").text("Created: " + created);
@@ -299,9 +317,9 @@ function initSettings() {
 
 function getClaimItem(claim) {
     var claimItem = $(_claimTemplate).clone();
-    $(claimItem).find(".claim-name").html("<b>" + claim.claimTypeName + ":</b> " + claim.claimValue);
+    $(claimItem).find(".claim-name").html(claim.claimTypeName + ": " + claim.claimValue);
     $(claimItem).find(".claim-expires").text("Verified On: " + new Date(claim.createdOn * 1000).toLocaleDateString());
-    $(claimItem).find(".claim-signature-link").text(claim.signedById);
+    $(claimItem).find(".claim-signature-link").text(claim.signedByName);
     $(claimItem).find(".partner-details-link").attr("data-passportid", claim.signedById);
     return claimItem;
 }
@@ -348,6 +366,6 @@ function registerAddress(address) {
             alert("Error registering passport on NEO network.");
             return;
         }
-        initBlockchainAddresses(); 
+        initBlockchainAddresses();
     }, 50);
 }

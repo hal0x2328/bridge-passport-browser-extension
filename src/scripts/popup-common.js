@@ -45,77 +45,28 @@ function makeStringReadable(str) {
 }
 
 //Utility
-async function loadPage(pageName, params, popup) {
-	var target = "./" + pageName + ".html";
-	if (params) {
-		target = target + "?params=" + params;
+async function loadPage(pageName, param, popup) {
+	if(popup){
+		await _browser.runtime.sendMessage({ target: 'background', action: 'openPopup', param, pageName });
 	}
+	else{
+		let url = "./" + pageName + ".html";
+		if(param)
+			url = url + "?p=" + param;
 
-	if (popup) {
-		var url = _browser.extension.getURL("/pages/" + pageName + ".html");
-		if (params) {
-			url = url + "?params=" + params;
-		}
-
-		var height = screen.height * .80;
-		var width = screen.width * .50;
-
-		if(height < 1024)
-			height = screen.height;
-		else if(height > 1024)
-			height = 1024;
-
-		if(width < 1280)
-			width = screen.width;
-		else if(width > 1280)
-			width = 1280;
-
-		var windowSize = {
-			height,
-			width,
-			left: window.screenX-(width/2),
-			top: window.screenY
-		};
-
-		window.close();
-		var res = await _browser.runtime.sendMessage({ target: 'background', action: 'openPopup', url, windowSize });
-	}
-	else {
-		location.href = target;
+		location.href = url;
 	}
 }
 
-function getParamsFromLocation() {
+function getParamFromLocation() {
 	var target = String(window.location);
-	var idx = target.lastIndexOf("params=");
+	var idx = target.lastIndexOf("p=");
 	if (idx == -1)
 		return null;
 
-	return target.substring(idx + 7, target.length);
-}
-
-async function checkPassportLogin() {
-	var login = null;
-	try {
-		login = await getPassportLogin();
-	}
-	catch (err) {
-
-	}
-
-	return login;
-}
-
-async function checkPassportPayment(){
-	var payment = null;
-	try{
-		payment = await getPassportPayment();
-	}
-	catch(err){
-		alert(err);
-	}
-
-	return payment;
+	let param = target.substring(idx + 2, target.length);
+	console.log("param: " + param);
+	return param;
 }
 
 function exportPassport(passport) {
@@ -242,40 +193,12 @@ async function getVerificationPartners() {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'getVerificationPartners' });
 }
 
-async function getPassportLogin() {
-	try{
-		var tabs = await _browser.tabs.query({ active: true, currentWindow: true });
-		let message = {
-			action: 'getBridgeLoginRequest'
-		};
-	
-		return await _browser.tabs.sendMessage(tabs[0].id, message);
-	}
-	catch(err){
-		
-	}
-
-	return null;
-}
-
-async function getPassportPayment() {
-	try{
-		var tabs = await _browser.tabs.query({ active: true, currentWindow: true });
-		let message = {
-			action: 'getBridgePaymentRequest'
-		};
-	
-		return await _browser.tabs.sendMessage(tabs[0].id, message);
-	}
-	catch(err){
-
-	}
-
-	return null;
+async function getVerificationPartner(partnerId) {
+	return await _browser.runtime.sendMessage({ target: 'background', action: 'getVerificationPartne', partnerId });
 }
 
 async function sendPassportLogin(passportId, responseValue) {
-	var tabs = await _browser.tabs.query({ active: true, currentWindow: true });
+	var tabs = await _browser.tabs.query({ active: true, currentWindow: false });
 	let message = {
 		action: 'sendBridgeLoginResponse',
 		passportId,
@@ -286,7 +209,7 @@ async function sendPassportLogin(passportId, responseValue) {
 }
 
 async function sendPassportPayment(transactionId){
-	var tabs = await _browser.tabs.query({ active: true, currentWindow: true });
+	var tabs = await _browser.tabs.query({ active: true, currentWindow: false });
 	let message = {
 		action: 'sendBridgePaymentResponse',
 		transactionId
