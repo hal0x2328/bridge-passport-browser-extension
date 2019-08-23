@@ -95,9 +95,7 @@ button{
 }
 
 .view-key{
-    color: white !important;
-    background-color: #58bd00 !important; 
-    margin-left:6px !important;
+    color: #58bd00 !important; 
     padding:2px 6px 2px 6px !important;
 }
 

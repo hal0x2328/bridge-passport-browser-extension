@@ -330,18 +330,14 @@ function getBlockchainItem(address) {
     $(item).find(".blockchain-address").html(address.address);
     $(item).find(".neo-brdg-balance").html(address.brdgbalance);
     $(item).find(".neo-gas-balance").html(address.gasbalance);
-    $(item).find(".view-key").click(function () {
-        showWait("Getting Private Key...");
-        setTimeout(async function () {
-            var key = await getBlockchainPrivateKey(address.network, address.key);
-            if (address.network == "NEO") {
-                $("#key_modal_text").text("Private Key (WIF)");
-                window.getSelection().removeAllRanges();
-            }
+    $(item).find(".view-key").click(async function () {
+        var key = await getBlockchainPrivateKey(address.network, address.key);
+        if (address.network == "NEO") {
+            $("#key_modal_text").text("Private Key (WIF)");
             $("#wif_value").val(key);
-            $('#key_modal').modal('show');
-            hideWait();
-        }, 50);
+            window.getSelection().removeAllRanges();
+        }
+        $('#key_modal').modal("show");
     });
 
     if (address.registered) {
