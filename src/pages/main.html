@@ -121,11 +121,24 @@
                 <div class="claim-info claim-signature">Verified By: <span class="claim-signature-link"></span></div>
             </div>
         </div>
+        <div class="ui segment transaction-template" style="padding:2px; margin:2px;">
+            <div class="bridge-transaction-icon-container">
+                <img src="/images/shared/bridge-token-white.png" style="width:34px; margin:10px;">
+            </div>
+            <div style="display:inline-table; vertical-align:top; margin-left:4px;">
+                <a href='#' class="transaction-details-link"><i class="ui icon alternate external"></i></a>
+                <div class="transaction-info transaction-id"></div>
+                <div class="transaction-info transaction-amount"></div>
+                <div class="transaction-info transaction-from"></div>
+                <div class="transaction-info transaction-to"></div>
+            </div>
+        </div>
         <div class="ui segment application-template" style="padding:2px; margin:2px;">
             <div class="bridge-application-icon-container">
                 <img src="/images/shared/bridge-token-white.png" style="width:34px; margin:10px;">
             </div>
             <div style="display:inline-table; vertical-align:top; margin-left:4px;">
+                <a href='#' class="application-details-link"><i class="ui icon alternate external"></i></a>
                 <div class="application-info application-created"></div>
                 <div class="application-info application-status"></div>
                 <div class="application-info application-partner"></div>
@@ -140,6 +153,7 @@
                     <b>Address</b>:
                     <span class="blockchain-address"></span>
                     <a href='#' class='view-key'><i class="ui icon key"></i></a>
+                    <a href='#' class='view-transactions'><i class="ui icon cubes"></i></a>
                 </div>
                 <div class="blockchain-info">
                     Balances:
@@ -178,8 +192,8 @@
             Login Request...
         </div>
         <div class="actions">
-            <div id="login_cancel_button" class="ui button cancel">Cancel</div>
-            <div id="login_ok_button" class="ui button purple cancel">Login with Bridge Passport</div>
+            <div id="login_cancel_button" class="ui cancel button">Cancel</div>
+            <div id="login_ok_button" class="ui approve button purple">Login with Bridge Passport</div>
         </div>
     </div>
 
@@ -192,8 +206,8 @@
             Payment Request...
         </div>
         <div class="actions">
-            <div id="payment_cancel_button" class="ui button cancel">Cancel</div>
-            <div id="payment_ok_button" class="ui button purple cancel">Make Paymennt</div>
+            <div id="payment_cancel_button" class="ui cancel button">Cancel</div>
+            <div id="payment_ok_button" class="ui approve button purple">Make Paymennt</div>
         </div>
     </div>
 
@@ -238,6 +252,18 @@
         </div>
         <div class="actions">
             <div id="ok_button" class="ui button purple cancel">OK</div>
+        </div>
+    </div>
+
+    <div id="transactions_modal" class="ui tiny modal">
+        <div class="header inverted top aligned modal-header">
+            <img class="modal-header-image" src="/images/shared/bridge-token.png" />
+            Recent Transactions
+        </div>
+        <div id="transaction_list" class="content" style="padding:0px !important;height:400px; overflow-y: auto;">
+        </div>
+        <div class="actions">
+            <div class="ui button purple cancel">OK</div>
         </div>
     </div>
 

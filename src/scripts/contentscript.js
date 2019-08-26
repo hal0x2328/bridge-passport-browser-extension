@@ -1,3 +1,22 @@
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  let res = null;
+  alert("request!");
+  if(request.action == 'sendBridgeLoginResponse'){
+    $('#bridge_protocol_passport_login_response').val(request.responseValue).trigger('change');
+    $('#bridge_protocol_passport_login_passport_id').val(request.passportId).trigger('change');
+    $('#bridge_passport_login_form').attr('onsubmit', '');
+    $('#bridge_passport_login_form').submit();
+  }
+
+  if(request.action == 'sendBridgePaymentResponse'){
+    $('#bridge_passport_payment_transaction_id').val(request.transactionId).trigger('change');
+    $('#bridge_passport_payment_form').attr('onsubmit', '');
+    $('#bridge_passport_payment_form').submit();
+  }
+  
+  sendResponse(res);
+});
+
 document.addEventListener("bridge-protocol-login-request", function(data) {
   if(!data.detail.loginRequest)
   {
@@ -26,23 +45,3 @@ document.addEventListener("bridge-protocol-payment-request", function(data) {
   chrome.runtime.sendMessage({ target: "background", action: "payment", detail: data.detail });
 });
 
-
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-  let res = null;
-  alert(JSON.stringify(request));
-
-  //if(request.action == 'sendBridgeLoginResponse'){
-  //  $('#bridge_protocol_passport_login_response').val(request.responseValue).trigger('change');
-  //  $('#bridge_protocol_passport_login_passport_id').val(request.passportId).trigger('change');
-  //  $('#bridge_passport_login_form').attr('onsubmit', '');
-  //  $('#bridge_passport_login_form').submit();
-  //}
-
-  //if(request.action == 'sendBridgePaymentResponse'){
-  //  $('#bridge_passport_payment_transaction_id').val(request.transactionId).trigger('change');
-  //  $('#bridge_passport_payment_form').attr('onsubmit', '');
-  //  $('#bridge_passport_payment_form').submit();
-  //}
-  
-  sendResponse(res);
-});

@@ -75,7 +75,13 @@ button{
 
 .bridge-application-icon-container{
     display:inline-table; 
-    background-color:rgba(52,139,201,1);
+    background-color:rgba(144,64,153,1); 
+    border-radius:5px;
+}
+
+.bridge-transaction-icon-container{
+    display:inline-table; 
+    background-color:rgba(144,64,153,1); 
     border-radius:5px;
 }
 
@@ -89,6 +95,11 @@ button{
     font-size:11px !important;
 }
 
+.transaction-info{
+    width:100% !important;
+    font-size:11px !important;
+}
+
 .application-info{
     width:100% !important;
     font-size:11px !important;
@@ -97,6 +108,10 @@ button{
 .view-key{
     color: #58bd00 !important; 
     padding:2px 6px 2px 6px !important;
+}
+
+.view-transactions{
+    color: #58bd00 !important; 
 }
 
 .register-address{
@@ -132,4 +147,16 @@ button{
     transition-property: transform;
     transform: rotate(360deg);
     -webkit-transform: rotate(360deg);
+}
+
+.transaction-details-link{
+    position:absolute; 
+    right:0px; 
+    top:0px;
+}
+
+.application-details-link{
+    position:absolute; 
+    right:0px; 
+    top:0px;
 }

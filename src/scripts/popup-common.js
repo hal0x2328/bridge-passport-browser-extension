@@ -60,13 +60,26 @@ async function loadPage(pageName, param, popup) {
 
 function getParamFromLocation() {
 	var target = String(window.location);
-	var idx = target.lastIndexOf("p=");
+	var idx = target.lastIndexOf("?");
 	if (idx == -1)
 		return null;
 
-	let param = target.substring(idx + 2, target.length);
-	console.log("param: " + param);
-	return param;
+	let params = target.substring(idx + 1, target.length);
+	console.log("param: " + params);
+	return params;
+}
+
+function getParams(qs){
+	let params = [];
+	let pairs = qs.split('&');
+	for(let i=0; i<pairs.length; i++){
+		let pair = pairs[i].split('=');
+		params.push({
+			key: pair[0],
+			val: pair[1]
+		});
+	}
+	return params;
 }
 
 function exportPassport(passport) {
@@ -197,27 +210,6 @@ async function getVerificationPartner(partnerId) {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'getVerificationPartne', partnerId });
 }
 
-async function sendPassportLogin(passportId, responseValue) {
-	var tabs = await _browser.tabs.query({ active: true, currentWindow: false });
-	let message = {
-		action: 'sendBridgeLoginResponse',
-		passportId,
-		responseValue
-	};
-
-	return await _browser.tabs.sendMessage(tabs[0].id, message);
-}
-
-async function sendPassportPayment(transactionId){
-	var tabs = await _browser.tabs.query({ active: true, currentWindow: false });
-	let message = {
-		action: 'sendBridgePaymentResponse',
-		transactionId
-	};
-
-	return await _browser.tabs.sendMessage(tabs[0].id, message);
-}
-
 async function getPassportLoginRequest(payload) {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'getPassportLoginRequest', payload });
 }
@@ -226,11 +218,11 @@ async function getPassportLoginResponse(request, claimTypeIds) {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'getPassportLoginResponse', request, claimTypeIds });
 }
 
-async function removeAllApplicationClaims(applicationId, callback) {
+async function removeAllApplicationClaims(applicationId) {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'removeAllApplicationClaims', applicationId });
 }
 
-async function updateClaimPackages(claimPackages, callback) {
+async function updateClaimPackages(claimPackages) {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'updateClaimPackages', claimPackages });
 }
 

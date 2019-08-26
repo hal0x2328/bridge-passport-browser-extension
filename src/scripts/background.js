@@ -54,7 +54,7 @@ function openPopup(pageName, param) {
   
   let url = _browser.extension.getURL("/pages/" + pageName + ".html");
   if (param)
-    url = url + "?p=" + param;
+    url = url + "?" + param;
 
   console.log("Opening Passport window: " + JSON.stringify({ url, windowSize }));
 
@@ -99,14 +99,12 @@ _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) 
     return;
 
   if (request.action == "login") {
-    console.log("login request received");
-    openPopup("main", "login");
+    openPopup("main", "sender=" + sender.tab.id + "&login=" + request.detail.loginRequest);
     return;
   }
 
   if (request.action == "payment") {
-    console.log("payment request received");
-    openPopup("main", "payment");
+    openPopup("main", "sender=" + sender.tab.id + "&payment=" + request.detail.amount + ":" + request.detail.account);
     return;
   }
 

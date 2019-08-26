@@ -1,19 +1,22 @@
 var _passport;
 var _passphrase;
 var _settings;
-var _param;
+var _params;
 
 //Templates
 var _claimTemplate;
 var _blockchainTemplate;
 var _applicationTemplate;
+var _transactionTemplate;
 
 $(function () {
     Init();
 });
 
 async function Init() {
-    _param = getParamFromLocation();
+    let param = getParamFromLocation();
+    if (param)
+        _params = getParams(param);
     _settings = await getSettings();
     _passport = await getPassport();
     _passphrase = await getPassphrase();
@@ -25,7 +28,7 @@ async function Init() {
     }
 
     if (!_passport) { //If we can't, it means we don't have one loaded
-        loadPage("createpassport", _param);
+        loadPage("createpassport", param);
         return;
     }
 
@@ -38,11 +41,53 @@ async function Init() {
     initUI();
     hideWait();
 
-    if (_param == "login") {
-        $("#login_modal").modal({ closable: false }).modal("show");
-    }
-    else if (_param == "payment") {
-        $("#payment_modal").modal({ closable: false }).modal("show");
+    //TODO: Refactor all of this, just POC for new interaction
+    if (_params && _params.length > 0) {
+        let tabId;
+        let loginRequestPayload;
+        let paymentRequest;
+
+        //Find the tab we need to interact with
+        for (let i = 0; i < _params.length; i++) {
+            if (_params[i].key == "sender") {
+                tabId = _params[i].val;
+            }
+        }
+
+        for (let i = 0; i < _params.length; i++) {
+            if (_params[i].key == "login") {
+                loginRequestPayload = _params[i].val;
+                let loginRequest = await getPassportLoginRequest(loginRequestPayload);
+                $("#login_modal").modal({
+                    closable: false,
+                    onApprove: async function () {
+                        console.log("Get passport login response");
+                        let responseValue = await getPassportLoginResponse(loginRequest, [3]);
+                        console.log(JSON.stringify(responseValue));
+                        var tabs = await _browser.tabs.query({ active: true, currentWindow: false });
+                        let message = {
+                            action: 'sendBridgeLoginResponse',
+                            passportId: _passport.id,
+                            responseValue: responseValue.payload
+                        };
+
+                        let tab;
+                        for(let i=0; i<tabs.length; i++){
+                            if(tabs[i].id == tabId)
+                                tab = tabs[i];
+                        }
+
+                        return await _browser.tabs.sendMessage(tab.id, message);
+                    },
+                    onDeny: async function () {
+
+                    }
+                }).modal("show");
+            }
+            else if (_params[i].key == "payment") {
+
+            }
+        }
     }
 }
 
@@ -244,7 +289,7 @@ async function initVerifications() {
     return new Promise(async (resolve, reject) => {
         _applicationTemplate = $(".application-template").first();
         let res = await getApplications();
-        if(res.error){
+        if (res.error) {
             $("#create_verification_request_button").prop('disabled', true);
         }
         console.log(JSON.stringify(res));
@@ -253,7 +298,7 @@ async function initVerifications() {
             if (res.applications && res.applications.length > 0) {
                 $("#verification_request_list").empty();
             }
-            else{
+            else {
                 $("#verification_request_list").empty();
                 $("#verification_request_list").text("No active verifications found");
             }
@@ -263,8 +308,7 @@ async function initVerifications() {
                 $("#verification_request_list").append(item);
             }
         }
-        else if(res.error)
-        {
+        else if (res.error) {
             $("#verification_request_list").empty();
             $("#verification_request_list").text("Error connecting to Bridge public api. Verification requests are unavailable.");
         }
@@ -324,6 +368,18 @@ function getClaimItem(claim) {
     return claimItem;
 }
 
+function getTransactionItem(tx) {
+    var transactionItem = $(_transactionTemplate).clone();
+    $(transactionItem).find(".transaction-id").text("Id: " + tx.txid);
+    $(transactionItem).find(".transaction-amount").text("Amount: " + tx.amount);
+    $(transactionItem).find(".transaction-from").text("From: " + tx.address_from);
+    $(transactionItem).find(".transaction-to").text("To: " + tx.address_to);
+    $(transactionItem).find(".transaction-details-link").click(function () {
+        window.open("https://neoscan.io/transaction/" + tx.txid);
+    });
+    return transactionItem;
+}
+
 function getBlockchainItem(address) {
     var item = $(_blockchainTemplate).clone();
     $(item).find(".blockchain-network").html(address.network);
@@ -338,6 +394,22 @@ function getBlockchainItem(address) {
             window.getSelection().removeAllRanges();
         }
         $('#key_modal').modal("show");
+    });
+
+    $(item).find(".view-transactions").click(async function () {
+        let blockchainHelper = new BridgeProtocol.Blockchain(_settings.apiBaseUrl, _passport, _passphrase);
+        let res = await blockchainHelper.getRecentTransactions("NEO", address.address);
+
+        $("#transaction_list").empty();
+        if (!res || res.length == 0) {
+            $("#transaction_list").text("No transactions found");
+        }
+
+        _transactionTemplate = $(".transaction-template").first();
+        for (let i = 0; i < res.length; i++) {
+            $("#transaction_list").append(getTransactionItem(res[i]));
+        }
+        $("#transactions_modal").modal("show");
     });
 
     if (address.registered) {
