@@ -182,6 +182,16 @@ async function checkApplicationPaymentStatus(applicationId, callback){
 	}, 15000);
 }
 
+
+function checkMissingLoginClaimType(missingClaimTypes, claimTypeId) {
+    for (let i = 0; i < missingClaimTypes.length; i++) {
+        if (missingClaimTypes[i].id == claimTypeId) {
+            return true;
+        }
+    }
+    return false;
+}
+
 //Background script messaging helpers
 async function getBridgePassportId(){
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'getBridgePassportId' });

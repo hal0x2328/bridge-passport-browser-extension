@@ -8,6 +8,7 @@ var _claimTemplate;
 var _blockchainTemplate;
 var _applicationTemplate;
 var _transactionTemplate;
+var _loginClaimTypeTemplate;
 
 //Look for login or payment requests
 _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
@@ -56,8 +57,7 @@ async function Init() {
     await initBlockchainAddresses();
     initSettings();
     initUI();
-    hideWait();
-
+    
     //If we were launched from a request, now that we're loaded, do the action
     if (_params) {
         let action = getParamAction(_params);
@@ -68,6 +68,8 @@ async function Init() {
             await initPayment(action.sender, action.paymentRequest.amount, action.paymentRequest.address, action.paymentRequest.identifier);
         }
     }
+
+    hideWait();
 }
 
 async function initPayment(sender, amount, address, identifier) {
@@ -97,6 +99,7 @@ async function initPayment(sender, amount, address, identifier) {
                 transactionId: txid
             };
             await sendMessageToTab(sender, message);
+            loadPage("main");
             hideWait();
         }
         catch (err) {
@@ -107,21 +110,45 @@ async function initPayment(sender, amount, address, identifier) {
 }
 
 async function initLogin(sender, loginRequest) {
+    //Unpack the request
+    let requestValue = await getPassportLoginRequest(loginRequest);
     //TODO: User interface to choose requested claims to include
+     _loginClaimTypeTemplate = $(".login-claim-type-template").first();
+    
+     $("#login_claim_types").empty();
+    for(let i=0; i<requestValue.claimTypes.length; i++){
+        let item = getLoginClaimItem(requestValue.missingClaimTypes, requestValue.claimTypes[i]);
+        $("#login_claim_types").append(item);
+    }
+
+    $("#loginrequest_passport_id").text("Passport Id:" + requestValue.passportDetails.id);
+    $("#loginrequest_partner_name").text("Partner Name:" + requestValue.passportDetails.partnerName);
+    if(!requestValue.payload.token){
+        $("token_invalid").text("Token signature was invalid.  Proceed with caution.");
+    }
+    
     $("#login_modal").modal({
         closable: false,
         onApprove: async function () {
+            let claimTypeIds = new Array();
+            $("#login_claim_types").find("input[type=checkbox]").each(function () {
+                if ($(this).prop("checked")) {
+                    let id = $(this).attr("id").replace("loginclaim_","");
+                    claimTypeIds.push(parseInt(id));
+                }
+            });
+
             showWait("Sending Login Response...");
             setTimeout(async function () {
                 try {
-                    let requestValue = await getPassportLoginRequest(loginRequest);
-                    let responseValue = await getPassportLoginResponse(requestValue, [3]);
+                    let responseValue = await getPassportLoginResponse(requestValue, claimTypeIds);
                     let message = {
                         action: 'sendBridgeLoginResponse',
                         responseValue: responseValue.payload
                     };
                     await sendMessageToTab(sender, message);
                     hideWait();
+                    loadPage("main");
                 }
                 catch (err) {
                     alert("Error sending login response: " + err);
@@ -133,6 +160,19 @@ async function initLogin(sender, loginRequest) {
 
         }
     }).modal("show");
+}
+
+function getLoginClaimItem(missingClaimTypes, claimType){
+    var item = $(_loginClaimTypeTemplate).clone();
+    let name = claimType.name;
+
+    if(checkMissingLoginClaimType(missingClaimTypes, claimType.id)){
+        name += " (Missinng)";
+        $(item).find("input").attr("disabled",true);
+    }
+    $(item).find(".login-claim-type-name").html(name);
+    $(item).find(".login-claim-type-id").html(claimType.id).attr("id","loginclaim_" + claimType.id);
+    return item;
 }
 
 async function initUI() {

@@ -111,6 +111,12 @@
 
     <!-- Content Templates -->
     <div style="display:none;">
+        <div class="login-claim-type-template">
+            <div class="ui checkbox login-claim-type-template">
+                <input type="checkbox" class="login-claim-type-id">
+                <label class="login-claim-type-name"></label>
+            </div>
+        </div>
         <div class="ui segment claim-template" style="padding:2px; margin:2px;">
             <div class="bridge-claim-icon-container">
                 <img src="/images/shared/bridge-token-white.png" style="width:34px; margin:10px;">
@@ -176,7 +182,6 @@
                         </span>
                     </span>
                 </div>
-
             </div>
         </div>
     </div>
@@ -189,7 +194,16 @@
             Login with Bridge Passport
         </div>
         <div class="content">
-            Login Request...
+            <div>Requested Claim Types</div>
+            <div id="login_claim_types"></div>
+            <div>Passport Info</div>
+            <div>
+                <div id="loginrequest_passport_id"></div>
+                <div id="loginrequest_partner_name"></div>
+            </div>
+        </div>
+        <div class="warnings">
+            <div class="token_invalid"></div>
         </div>
         <div class="actions">
             <div id="login_cancel_button" class="ui cancel button">Cancel</div>
@@ -284,7 +298,8 @@
             </div>
         </div>
         <div class="actions" style="padding:0px; width:100%;">
-            <button id="unlock_passport_button" class="ui button purple" style="margin:0px; margin-bottom:-1px;">Unlock Bridge
+            <button id="unlock_passport_button" class="ui button purple" style="margin:0px; margin-bottom:-1px;">Unlock
+                Bridge
                 Passport</button>
         </div>
     </div>
