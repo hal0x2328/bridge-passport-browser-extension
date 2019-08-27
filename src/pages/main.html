@@ -11,6 +11,7 @@
     <script src="/scripts/common.js"></script>
     <script src="/scripts/popup-common.js"></script>
     <script src="/scripts/bridgeprotocol.min.js"></script>
+    <script src="/scripts/bignumber.min.js"></script>
     <script src="./main.js"></script>
 </head>
 
@@ -211,13 +212,27 @@
         </div>
     </div>
 
-    <div id="payment_modal" class="ui  modal">
+    <div id="payment_modal" class="ui tiny modal">
         <div class="header inverted top aligned modal-header">
             <img class="modal-header-image" src="/images/shared/bridge-token.png" />
-            Payment Request
+            Blockchain Payment Request
         </div>
-        <div class="content">
-            Payment Request...
+        <div class="ui content form">
+            <div class="ui field">
+                <label>Recipient Address</label>
+                <input id="payment_address" readonly>
+            </div>
+            <div class="ui field">
+                <label>Amount Requested</label>
+                <input id="payment_amount" readonly>
+            </div>
+            <div class="ui field">
+                <label>Payment Identifier</label>
+                <input id="payment_identifier" readonly>
+            </div>
+        </div>
+        <div class="warnings">
+
         </div>
         <div class="actions">
             <div id="payment_cancel_button" class="ui cancel button">Cancel</div>

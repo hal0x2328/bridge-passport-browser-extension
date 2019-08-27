@@ -57,7 +57,7 @@ async function Init() {
     await initBlockchainAddresses();
     initSettings();
     initUI();
-    
+
     //If we were launched from a request, now that we're loaded, do the action
     if (_params) {
         let action = getParamAction(_params);
@@ -73,67 +73,87 @@ async function Init() {
 }
 
 async function initPayment(sender, amount, address, identifier) {
-    //TODO: User interface to accept the transaction / send
-    let txid;
+    $("#payment_address").val(address);
+    let x = new BigNumber(amount * .00000001);
+    $("#payment_amount").val(x.toFixed());
+    $("#payment_identifier").val(identifier);
 
-    showWait("Sending Payment to Blockchain...");
-    setTimeout(async function () {
-        try {
-            let blockchainHelper = new BridgeProtocol.Blockchain(_settings.apiBaseUrl, _passport, _passphrase);
-            txid = await blockchainHelper.sendPayment("NEO", parseInt(amount), address, identifier, false);
-            if(!txid){
-                alert("Error sending payment.");      
-                hideWait();
-                return;
+    //TODO: Check the balance requested against the BRDG balance in the wallet
+    //And don't let them send if they don't have sufficient funds
+
+    $("#payment_modal").modal({
+        closable: false,
+        onApprove: async function () {
+            showWait("Sending Payment to Blockchain...");
+            setTimeout(async function () {
+                let txid;
+                try {
+                    let blockchainHelper = new BridgeProtocol.Blockchain(_settings.apiBaseUrl, _passport, _passphrase);
+                    txid = await blockchainHelper.sendPayment("NEO", parseInt(amount), address, identifier, false);
+                    if (!txid) {
+                        alert("Error sending payment.");
+                        hideWait();
+                        return;
+                    }
+                }
+                catch (err) {
+                    alert("Error sending payment: " + err);
+                    hideWait();
+                }
+
+                showWait("Sending Payment Transaction Information", false);
+                try {
+                    let message = {
+                        action: "sendBridgePaymentResponse",
+                        transactionId: txid
+                    };
+                    await sendMessageToTab(sender, message);
+                    hideWait();
+                    if(_params){
+                        loadPage("main");
+                    }
+                }
+                catch (err) {
+                    alert("Error sending login response: " + err);
+                    hideWait();
+                    if(_params){
+                        loadPage("main");
+                    }
+                }
+            }, 50);
+        },
+        onDeny: async function () {
+            if(_params){
+                loadPage("main");
             }
         }
-        catch (err) {
-            alert("Error sending payment: " + err);
-            hideWait();
-        }
-
-        showWait("Sending Payment Transaction Information...");
-        try {
-            let message = {
-                action: "sendBridgePaymentResponse",
-                transactionId: txid
-            };
-            await sendMessageToTab(sender, message);
-            loadPage("main");
-            hideWait();
-        }
-        catch (err) {
-            alert("Error sending login response: " + err);
-            hideWait();
-        }
-    }, 50);
+    }).modal("show");
 }
 
 async function initLogin(sender, loginRequest) {
     //Unpack the request
     let requestValue = await getPassportLoginRequest(loginRequest);
-    //TODO: User interface to choose requested claims to include
-     _loginClaimTypeTemplate = $(".login-claim-type-template").first();
-    
-     $("#login_claim_types").empty();
-    for(let i=0; i<requestValue.claimTypes.length; i++){
+    _loginClaimTypeTemplate = $(".login-claim-type-template").first();
+
+    $("#login_claim_types").empty();
+    for (let i = 0; i < requestValue.claimTypes.length; i++) {
         let item = getLoginClaimItem(requestValue.missingClaimTypes, requestValue.claimTypes[i]);
         $("#login_claim_types").append(item);
     }
 
     $("#loginrequest_passport_id").text("Passport Id:" + requestValue.passportDetails.id);
     $("#loginrequest_partner_name").text("Partner Name:" + requestValue.passportDetails.partnerName);
-    if(!requestValue.payload.token){
+    if (!requestValue.payload.token) {
         $("token_invalid").text("Token signature was invalid.  Proceed with caution.");
     }
-    
+
     $("#login_modal").modal({
         closable: false,
         onApprove: async function () {
             let claimTypeIds = new Array();
             $("#login_claim_types").find("input[type=checkbox]").each(function () {
                 if ($(this).prop("checked")) {
-                    let id = $(this).attr("id").replace("loginclaim_","");
+                    let id = $(this).attr("id").replace("loginclaim_", "");
                     claimTypeIds.push(parseInt(id));
                 }
             });
@@ -148,30 +168,37 @@ async function initLogin(sender, loginRequest) {
                     };
                     await sendMessageToTab(sender, message);
                     hideWait();
-                    loadPage("main");
+                    if(_params){
+                        loadPage("main");
+                    }
                 }
                 catch (err) {
                     alert("Error sending login response: " + err);
                     hideWait();
+                    if(_params){
+                        loadPage("main");
+                    }
                 }
             }, 50);
         },
         onDeny: async function () {
-
+            if(_params){
+                loadPage("main");
+            }
         }
     }).modal("show");
 }
 
-function getLoginClaimItem(missingClaimTypes, claimType){
+function getLoginClaimItem(missingClaimTypes, claimType) {
     var item = $(_loginClaimTypeTemplate).clone();
     let name = claimType.name;
 
-    if(checkMissingLoginClaimType(missingClaimTypes, claimType.id)){
+    if (checkMissingLoginClaimType(missingClaimTypes, claimType.id)) {
         name += " (Missinng)";
-        $(item).find("input").attr("disabled",true);
+        $(item).find("input").attr("disabled", true);
     }
     $(item).find(".login-claim-type-name").html(name);
-    $(item).find(".login-claim-type-id").html(claimType.id).attr("id","loginclaim_" + claimType.id);
+    $(item).find(".login-claim-type-id").html(claimType.id).attr("id", "loginclaim_" + claimType.id);
     return item;
 }
 
