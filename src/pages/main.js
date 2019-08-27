@@ -9,17 +9,39 @@ var _blockchainTemplate;
 var _applicationTemplate;
 var _transactionTemplate;
 
+_browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    if (request.target != "popup")
+        return;
+
+    if(request.action === "focus"){
+        window.focus();
+        if(window.location.href)
+        window.location.href = request.url;
+    }
+
+    if(request.action === "login"){
+        window.focus();
+        initLogin(request.sender, request.loginRequest);
+    }
+
+    if(request.action === "payment"){
+        window.focus();
+        initPayment(request.sender, request.address, request.amount, request.identifier);
+    }
+
+    sendResponse();
+});
+
+
 $(function () {
     Init();
 });
 
 async function Init() {
-    let param = getParamFromLocation();
-    if (param)
-        _params = getParams(param);
     _settings = await getSettings();
     _passport = await getPassport();
     _passphrase = await getPassphrase();
+    _params = getQueryStringFromLocation();
 
     if (!_passphrase && _passport) {
         await initUnlock();
@@ -28,7 +50,7 @@ async function Init() {
     }
 
     if (!_passport) { //If we can't, it means we don't have one loaded
-        loadPage("createpassport", param);
+        loadPage("createpassport", _params);
         return;
     }
 
@@ -41,54 +63,48 @@ async function Init() {
     initUI();
     hideWait();
 
-    //TODO: Refactor all of this, just POC for new interaction
-    if (_params && _params.length > 0) {
-        let tabId;
-        let loginRequestPayload;
-        let paymentRequest;
-
-        //Find the tab we need to interact with
-        for (let i = 0; i < _params.length; i++) {
-            if (_params[i].key == "sender") {
-                tabId = _params[i].val;
-            }
+    //If we were launched from a request, now that we're loaded, do the action
+    if(_params){
+        let action = getParamAction(_params);
+        if(action.action === "login"){
+            await initLogin(action.sender, action.loginRequest);
         }
-
-        for (let i = 0; i < _params.length; i++) {
-            if (_params[i].key == "login") {
-                loginRequestPayload = _params[i].val;
-                let loginRequest = await getPassportLoginRequest(loginRequestPayload);
-                $("#login_modal").modal({
-                    closable: false,
-                    onApprove: async function () {
-                        console.log("Get passport login response");
-                        let responseValue = await getPassportLoginResponse(loginRequest, [3]);
-                        console.log(JSON.stringify(responseValue));
-                        var tabs = await _browser.tabs.query({ active: true, currentWindow: false });
-                        let message = {
-                            action: 'sendBridgeLoginResponse',
-                            passportId: _passport.id,
-                            responseValue: responseValue.payload
-                        };
-
-                        let tab;
-                        for(let i=0; i<tabs.length; i++){
-                            if(tabs[i].id == tabId)
-                                tab = tabs[i];
-                        }
-
-                        return await _browser.tabs.sendMessage(tab.id, message);
-                    },
-                    onDeny: async function () {
-
-                    }
-                }).modal("show");
-            }
-            else if (_params[i].key == "payment") {
-
-            }
+        else if(action.action === "payment"){
+            await initPayment(action.sender, action.address, action.amount, action.identifier);
         }
     }
+}
+
+async function initPayment(sender, address, amount, identifier){
+    alert("payment of + " + amount + " to " + address);
+}
+
+async function initLogin(sender, loginRequest){
+    $("#login_modal").modal({
+        closable: false,
+        onApprove: async function () {
+            showWait("Sending Login Response...");
+            setTimeout(async function () {
+                try {
+                    let requestValue = await getPassportLoginRequest(loginRequest);
+                    let responseValue = await getPassportLoginResponse(requestValue, [3]);
+                    let message = {
+                        action: 'sendBridgeLoginResponse',
+                        responseValue: responseValue.payload
+                    };
+                    await sendMessageToTab(sender, message);
+                    hideWait();
+                }
+                catch (err) {
+                    alert("Error sending login response: " + err);
+                    hideWait();
+                }
+            }, 50);
+        },
+        onDeny: async function () {
+
+        }
+    }).modal("show");
 }
 
 async function initUI() {
@@ -144,7 +160,7 @@ async function initPassportDetails() {
 
     $("#unload_button").click(async function () {
         await removePassport();
-        loadPage("createpassport", _param);
+        loadPage("createpassport");
     });
 
     $("#copy_passport_id").popup({ on: 'click' });
@@ -270,7 +286,7 @@ function initUnlock() {
             try {
                 var passport = await unlockPassport(passphrase);
                 if (passport) {
-                    loadPage("main", _param);
+                    loadPage("main", _params);
                 }
                 else {
                     $("#error").text("Invalid passphrase.");
@@ -322,7 +338,7 @@ function getApplicationItem(application) {
     var applicationItem = $(_applicationTemplate).clone();
     var link = $(applicationItem).find(".application-link");
     link.click(function () {
-        loadPage("verificationdetails", application.id);
+        alert("Show application details");
     })
     $(applicationItem).find(".application-status").text("Status: " + makeStringReadable(application.status));
     $(applicationItem).find(".application-partner").text("Partner: " + application.verificationPartnerName);

@@ -41,7 +41,14 @@ html, body {
     font-size:1.1em !important;
     background-color:#1b1c1d !important;
     color: white !important;
-  }
+}
+
+.modal-header-image{
+    width:30px; 
+    margin-top:-6px; 
+    margin-right:12px; 
+    float:left;
+}
 
   #loading_spinner_message{
     min-height:100px !important;

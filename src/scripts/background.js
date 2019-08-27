@@ -19,7 +19,7 @@ var popupWindowId = false;
 var windowNotOpenTitle = 'Open Bridge Passport';
 var windowIsOpenTitle = 'Bridge Passport is already open. Click to focus popup.';
 
-function openPopup(pageName, param) {
+function openPopup(pageName, params) {
   //Default to main
   if (!pageName)
     pageName = "main";
@@ -53,15 +53,14 @@ function openPopup(pageName, param) {
   };
   
   let url = _browser.extension.getURL("/pages/" + pageName + ".html");
-  if (param)
-    url = url + "?" + param;
+  if (params)
+    url = url + "?" + params;
 
   console.log("Opening Passport window: " + JSON.stringify({ url, windowSize }));
 
   if (typeof popupWindowId === 'number') {
     console.log("Passport window already open, focusing");
-    _browser.windows.remove(popupWindowId);
-    popupWindowId = false;
+    _browser.runtime.sendMessage({ target: "popup", action: "focus", url });
   }
   
   if (popupWindowId === false) {
@@ -99,17 +98,29 @@ _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) 
     return;
 
   if (request.action == "login") {
-    openPopup("main", "sender=" + sender.tab.id + "&login=" + request.detail.loginRequest);
+    if(popupWindowId === false){
+      openPopup("main", "sender=" + sender.tab.id + "&login_request=" + request.detail.loginRequest);
+    }
+    else{
+      _browser.runtime.sendMessage({ target: "popup", action: "login", sender: sender.tab.id, loginRequest: request.detail.loginRequest });
+    }
+    
     return;
   }
 
   if (request.action == "payment") {
-    openPopup("main", "sender=" + sender.tab.id + "&payment=" + request.detail.amount + ":" + request.detail.account);
+    if(popupWindowId === false){
+      openPopup("main", "sender=" + sender.tab.id + "&payment_address=" + request.detail.paymentAddress + "&payment_amount=" + request.detail.paymentAmount + "&payment_identifier=" + request.detail.paymentIdentifier);
+    }
+    else{
+      _browser.runtime.sendMessage({ target: "popup", action: "payment", sender: sender.tab.id, amount: request.detail.paymentAmount, address: request.detail.paymentAddress, identifier: request.detail.paymentIdentifier });
+    }
+
     return;
   }
 
   if (request.action == "openPopup") {
-    openPopup(request.pageName, request.param);
+    openPopup(request.pageName, request.params);
     return;
   }
 

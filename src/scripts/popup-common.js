@@ -45,20 +45,66 @@ function makeStringReadable(str) {
 }
 
 //Utility
-async function loadPage(pageName, param, popup) {
+async function sendMessageToTab(tabId, message){
+	_browser.tabs.update(parseInt(tabId), { 'active': true }, async function(tab) { 
+		await _browser.tabs.sendMessage(tab.id, message);
+	});
+}
+
+async function loadPage(pageName, params, popup) {
 	if(popup){
-		await _browser.runtime.sendMessage({ target: 'background', action: 'openPopup', param, pageName });
+		await _browser.runtime.sendMessage({ target: 'background', action: 'openPopup', params, pageName });
 	}
 	else{
 		let url = "./" + pageName + ".html";
-		if(param)
-			url = url + "?p=" + param;
+		if(params)
+			url = url + "?" + params;
 
 		location.href = url;
 	}
 }
 
-function getParamFromLocation() {
+function getParamAction(queryString){
+	let action = {
+		action: "none",
+		loginRequest: null,
+		paymentRequest: {
+			amount: 0,
+			account: null
+		},
+		sender: null
+	};
+
+	let params = getParamsFromQueryString(queryString);
+	if(!params || !Array.isArray(params) || params.length == 0)
+		return { action };
+
+	for(let i=0; i<params.length; i++){
+		if (params[i].key == "sender") {
+			action.sender = params[i].val;
+		}
+		else if (params[i].key == "login_request") {
+			action.action = "login";
+			action.loginRequest = params[i].val;
+		}
+		else if (params[i].key == "payment_amount") {
+			action.action = "payment";
+			action.paymentRequest.amount = params[i].val;
+		}
+		else if(params[i].key == "payment_address"){
+			action.action = "payment";
+			action.paymentRequest.address = params[i].val;
+		}
+		else if(params[i].key == "payment_identifier"){
+			action.action = "payment";
+			action.paymentRequest.identifier = params[i].val;
+		}
+	}
+
+	return action;
+}
+
+function getQueryStringFromLocation() {
 	var target = String(window.location);
 	var idx = target.lastIndexOf("?");
 	if (idx == -1)
@@ -69,7 +115,7 @@ function getParamFromLocation() {
 	return params;
 }
 
-function getParams(qs){
+function getParamsFromQueryString(qs){
 	let params = [];
 	let pairs = qs.split('&');
 	for(let i=0; i<pairs.length; i++){

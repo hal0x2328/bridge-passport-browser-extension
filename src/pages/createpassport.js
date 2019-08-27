@@ -1,7 +1,7 @@
-var _param;
+var _params;
 
 $(function () {
-    _param = getParamFromLocation();
+    _params = getQueryStringFromLocation();
 
     $("#create_passport_link").click(function () {
         $("#create_passport_container").show();
@@ -9,7 +9,7 @@ $(function () {
     });
 
     $("#import_passport_link").click(function () {
-        loadPage("importpassport",_param);
+        loadPage("importpassport", _params);
     });
 
     $("#create_passport_button").click(async function () {
@@ -33,7 +33,7 @@ $(function () {
             try {
                 var passport = await createPassport(passphrase, $("#neo_wif").val(), true);
                 if (passport) {
-                    loadPage("main", _param);
+                    loadPage("main", _params);
                 }
                 else {
                     alert("Could not create passport");
