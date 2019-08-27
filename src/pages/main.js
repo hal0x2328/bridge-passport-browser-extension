@@ -13,18 +13,18 @@ _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) 
     if (request.target != "popup")
         return;
 
-    if(request.action === "focus"){
+    if (request.action === "focus") {
         window.focus();
-        if(window.location.href)
-        window.location.href = request.url;
+        if (window.location.href)
+            window.location.href = request.url;
     }
 
-    if(request.action === "login"){
+    if (request.action === "login") {
         window.focus();
         initLogin(request.sender, request.loginRequest);
     }
 
-    if(request.action === "payment"){
+    if (request.action === "payment") {
         window.focus();
         initPayment(request.sender, request.address, request.amount, request.identifier);
     }
@@ -64,22 +64,39 @@ async function Init() {
     hideWait();
 
     //If we were launched from a request, now that we're loaded, do the action
-    if(_params){
+    if (_params) {
         let action = getParamAction(_params);
-        if(action.action === "login"){
+        if (action.action === "login") {
             await initLogin(action.sender, action.loginRequest);
         }
-        else if(action.action === "payment"){
+        else if (action.action === "payment") {
             await initPayment(action.sender, action.address, action.amount, action.identifier);
         }
     }
 }
 
-async function initPayment(sender, address, amount, identifier){
+async function initPayment(sender, address, amount, identifier) {
     alert("payment of + " + amount + " to " + address);
+    showWait("Sending Payment Transaction Information...");
+    setTimeout(async function () {
+        try {
+            let message = {
+                action: "sendBridgePaymentResponse",
+                transactionId: "123354235234534534"
+            };
+            alert("send message to " + sender);
+            await sendMessageToTab(sender, message);
+            hideWait();
+        }
+        catch (err) {
+            alert("Error sending login response: " + err);
+            hideWait();
+        }
+    }, 50);
+
 }
 
-async function initLogin(sender, loginRequest){
+async function initLogin(sender, loginRequest) {
     $("#login_modal").modal({
         closable: false,
         onApprove: async function () {
