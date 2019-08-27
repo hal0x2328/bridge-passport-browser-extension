@@ -84,7 +84,8 @@ function getParamAction(queryString){
 		loginRequest: null,
 		paymentRequest: {
 			amount: 0,
-			account: null
+			account: null,
+			identifier: null
 		},
 		sender: null
 	};

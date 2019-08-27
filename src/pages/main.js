@@ -21,7 +21,7 @@ _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) 
 
     if (request.action === "payment") {
         window.focus();
-        initPayment(request.sender, request.address, request.amount, request.identifier);
+        initPayment(request.sender, request.amount, request.address, request.identifier);
     }
 
     sendResponse();
@@ -65,21 +65,37 @@ async function Init() {
             await initLogin(action.sender, action.loginRequest);
         }
         else if (action.action === "payment") {
-            await initPayment(action.sender, action.address, action.amount, action.identifier);
+            await initPayment(action.sender, action.paymentRequest.amount, action.paymentRequest.address, action.paymentRequest.identifier);
         }
     }
 }
 
-async function initPayment(sender, address, amount, identifier) {
-    alert("payment of + " + amount + " to " + address);
-    showWait("Sending Payment Transaction Information...");
+async function initPayment(sender, amount, address, identifier) {
+    //TODO: User interface to accept the transaction / send
+    let txid;
+
+    showWait("Sending Payment to Blockchain...");
     setTimeout(async function () {
+        try {
+            let blockchainHelper = new BridgeProtocol.Blockchain(_settings.apiBaseUrl, _passport, _passphrase);
+            txid = await blockchainHelper.sendPayment("NEO", parseInt(amount), address, identifier, false);
+            if(!txid){
+                alert("Error sending payment.");      
+                hideWait();
+                return;
+            }
+        }
+        catch (err) {
+            alert("Error sending payment: " + err);
+            hideWait();
+        }
+
+        showWait("Sending Payment Transaction Information...");
         try {
             let message = {
                 action: "sendBridgePaymentResponse",
-                transactionId: "123354235234534534"
+                transactionId: txid
             };
-            alert("send message to " + sender);
             await sendMessageToTab(sender, message);
             hideWait();
         }
@@ -88,10 +104,10 @@ async function initPayment(sender, address, amount, identifier) {
             hideWait();
         }
     }, 50);
-
 }
 
 async function initLogin(sender, loginRequest) {
+    //TODO: User interface to choose requested claims to include
     $("#login_modal").modal({
         closable: false,
         onApprove: async function () {
