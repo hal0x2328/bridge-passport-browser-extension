@@ -9,15 +9,10 @@ var _blockchainTemplate;
 var _applicationTemplate;
 var _transactionTemplate;
 
+//Look for login or payment requests
 _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.target != "popup")
         return;
-
-    if (request.action === "focus") {
-        window.focus();
-        if (window.location.href)
-            window.location.href = request.url;
-    }
 
     if (request.action === "login") {
         window.focus();

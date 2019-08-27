@@ -102,6 +102,7 @@ _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) 
       openPopup("main", "sender=" + sender.tab.id + "&login_request=" + request.detail.loginRequest);
     }
     else{
+      _browser.runtime.sendMessage({ target: "popup", action: "focus" });
       _browser.runtime.sendMessage({ target: "popup", action: "login", sender: sender.tab.id, loginRequest: request.detail.loginRequest });
     }
     
@@ -113,6 +114,7 @@ _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) 
       openPopup("main", "sender=" + sender.tab.id + "&payment_address=" + request.detail.paymentAddress + "&payment_amount=" + request.detail.paymentAmount + "&payment_identifier=" + request.detail.paymentIdentifier);
     }
     else{
+      _browser.runtime.sendMessage({ target: "popup", action: "focus" });
       _browser.runtime.sendMessage({ target: "popup", action: "payment", sender: sender.tab.id, amount: request.detail.paymentAmount, address: request.detail.paymentAddress, identifier: request.detail.paymentIdentifier });
     }
 

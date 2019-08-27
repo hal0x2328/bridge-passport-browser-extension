@@ -1,3 +1,17 @@
+//Message handling
+_browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    if (request.target != "popup")
+        return;
+
+    if (request.action === "focus") {
+        window.focus();
+        if (request.url)
+            window.location.href = request.url;
+    }
+
+    sendResponse();
+});
+
 //UI
 document.title = 'Bridge Passport';
 
