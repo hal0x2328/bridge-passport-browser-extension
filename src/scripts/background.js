@@ -111,11 +111,11 @@ _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) 
 
   if (request.action == "payment") {
     if(popupWindowId === false){
-      openPopup("main", "sender=" + sender.tab.id + "&payment_address=" + request.detail.paymentAddress + "&payment_amount=" + request.detail.paymentAmount + "&payment_identifier=" + request.detail.paymentIdentifier);
+      openPopup("main", "sender=" + sender.tab.id + "&payment_request=" + request.detail.paymentRequest);
     }
     else{
       _browser.runtime.sendMessage({ target: "popup", action: "focus" });
-      _browser.runtime.sendMessage({ target: "popup", action: "payment", sender: sender.tab.id, amount: request.detail.paymentAmount, address: request.detail.paymentAddress, identifier: request.detail.paymentIdentifier });
+      _browser.runtime.sendMessage({ target: "popup", action: "payment", sender: sender.tab.id, paymentRequest: request.detail.paymentRequest });
     }
 
     return;

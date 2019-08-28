@@ -22,7 +22,7 @@ _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) 
 
     if (request.action === "payment") {
         window.focus();
-        initPayment(request.sender, request.amount, request.address, request.identifier);
+        initPayment(request.sender, request.paymentRequest);
     }
 
     sendResponse();
@@ -65,128 +65,153 @@ async function Init() {
             await initLogin(action.sender, action.loginRequest);
         }
         else if (action.action === "payment") {
-            await initPayment(action.sender, action.paymentRequest.amount, action.paymentRequest.address, action.paymentRequest.identifier);
+            await initPayment(action.sender, action.paymentRequest);
         }
     }
 
     hideWait();
 }
 
-async function initPayment(sender, amount, address, identifier) {
-    $("#payment_address").val(address);
-    let x = new BigNumber(amount * .00000001);
-    $("#payment_amount").val(x.toFixed());
-    $("#payment_identifier").val(identifier);
+async function initPayment(sender, paymentRequest) {
+    showWait("Payment request received, please wait");
+    setTimeout(async function () {
+        try {
+            let paymentHelper = new BridgeProtocol.Payment(_settings.apiBaseUrl, _passport, _passphrase);
+            let request = await paymentHelper.verifyPaymentRequest(paymentRequest);
+            let amount = request.payload.paymentRequest.amount;
+            let address = request.payload.paymentRequest.address;
+            let identifier = request.payload.paymentRequest.identifier;
+            let passportId = request.passportId;
 
-    //TODO: Check the balance requested against the BRDG balance in the wallet
-    //And don't let them send if they don't have sufficient funds
+            $("#payment_address").val(address);
+            let x = new BigNumber(amount * .00000001);
+            $("#payment_amount").val(x.toFixed());
+            $("#payment_identifier").val(identifier);
 
-    $("#payment_modal").modal({
-        closable: false,
-        onApprove: async function () {
-            showWait("Sending Payment to Blockchain...");
-            setTimeout(async function () {
-                let txid;
-                try {
-                    let blockchainHelper = new BridgeProtocol.Blockchain(_settings.apiBaseUrl, _passport, _passphrase);
-                    txid = await blockchainHelper.sendPayment("NEO", parseInt(amount), address, identifier, false);
-                    if (!txid) {
-                        alert("Error sending payment.");
-                        hideWait();
-                        return;
-                    }
-                }
-                catch (err) {
-                    alert("Error sending payment: " + err);
+            //TODO: Check the balance requested against the BRDG balance in the wallet
+            //And don't let them send if they don't have sufficient funds
+            $("#payment_modal").modal({
+                closable: false,
+                onApprove: async function () {
+                    showWait("Sending Payment to Blockchain...");
+                    setTimeout(async function () {
+                        let txid = "12345";
+                        //try {
+                        //    let blockchainHelper = new BridgeProtocol.Blockchain(_settings.apiBaseUrl, _passport, _passphrase);
+                        //    txid = await blockchainHelper.sendPayment("NEO", parseInt(amount), address, identifier, false);
+                        //    if (!txid) {
+                        //        alert("Error sending payment.");
+                        //        hideWait();
+                        //        return;
+                        //    }
+                        //}
+                        //catch (err) {
+                        //    alert("Error sending payment: " + err);
+                        //    hideWait();
+                        // }
+
+                        showWait("Sending Payment Transaction Information", false);
+                        try {
+                            let responseValue = await paymentHelper.createPaymentResponse("NEO", amount, address, identifier, txid, request.publicKey);
+                            let message = {
+                                action: "sendBridgePaymentResponse",
+                                paymentResponse: responseValue
+                            };
+                            await sendMessageToTab(sender, message);
+                            hideWait();
+                            if (_params) {
+                                loadPage("main");
+                            }
+                        }
+                        catch (err) {
+                            alert("Error sending login response: " + err);
+                            hideWait();
+                            if (_params) {
+                                loadPage("main");
+                            }
+                        }
+                    }, 50);
+                },
+                onDeny: async function () {
                     hideWait();
-                }
-
-                showWait("Sending Payment Transaction Information", false);
-                try {
-                    let message = {
-                        action: "sendBridgePaymentResponse",
-                        transactionId: txid
-                    };
-                    await sendMessageToTab(sender, message);
-                    hideWait();
-                    if(_params){
+                    if (_params) {
                         loadPage("main");
                     }
                 }
-                catch (err) {
-                    alert("Error sending login response: " + err);
-                    hideWait();
-                    if(_params){
-                        loadPage("main");
-                    }
-                }
-            }, 50);
-        },
-        onDeny: async function () {
-            if(_params){
-                loadPage("main");
-            }
+            }).modal("show");
         }
-    }).modal("show");
+        catch (err) {
+            alert("Error processing payment request: " + err);
+        }
+    }, 50);
 }
 
 async function initLogin(sender, loginRequest) {
-    //Unpack the request
-    let requestValue = await getPassportLoginRequest(loginRequest);
-    _loginClaimTypeTemplate = $(".login-claim-type-template").first();
+    showWait("Login request received, please wait");
+    setTimeout(async function () {
+        try {
+            //Unpack the request
+            let requestValue = await getPassportLoginRequest(loginRequest);
+            _loginClaimTypeTemplate = $(".login-claim-type-template").first();
 
-    $("#login_claim_types").empty();
-    for (let i = 0; i < requestValue.claimTypes.length; i++) {
-        let item = getLoginClaimItem(requestValue.missingClaimTypes, requestValue.claimTypes[i]);
-        $("#login_claim_types").append(item);
-    }
-
-    $("#loginrequest_passport_id").text("Passport Id:" + requestValue.passportDetails.id);
-    $("#loginrequest_partner_name").text("Partner Name:" + requestValue.passportDetails.partnerName);
-    if (!requestValue.payload.token) {
-        $("token_invalid").text("Token signature was invalid.  Proceed with caution.");
-    }
-
-    $("#login_modal").modal({
-        closable: false,
-        onApprove: async function () {
-            let claimTypeIds = new Array();
-            $("#login_claim_types").find("input[type=checkbox]").each(function () {
-                if ($(this).prop("checked")) {
-                    let id = $(this).attr("id").replace("loginclaim_", "");
-                    claimTypeIds.push(parseInt(id));
-                }
-            });
-
-            showWait("Sending Login Response...");
-            setTimeout(async function () {
-                try {
-                    let responseValue = await getPassportLoginResponse(requestValue, claimTypeIds);
-                    let message = {
-                        action: 'sendBridgeLoginResponse',
-                        responseValue: responseValue.payload
-                    };
-                    await sendMessageToTab(sender, message);
-                    hideWait();
-                    if(_params){
-                        loadPage("main");
-                    }
-                }
-                catch (err) {
-                    alert("Error sending login response: " + err);
-                    hideWait();
-                    if(_params){
-                        loadPage("main");
-                    }
-                }
-            }, 50);
-        },
-        onDeny: async function () {
-            if(_params){
-                loadPage("main");
+            $("#login_claim_types").empty();
+            for (let i = 0; i < requestValue.claimTypes.length; i++) {
+                let item = getLoginClaimItem(requestValue.missingClaimTypes, requestValue.claimTypes[i]);
+                $("#login_claim_types").append(item);
             }
+
+            $("#loginrequest_passport_id").text(requestValue.passportDetails.id);
+            $("#loginrequest_partner_name").text(requestValue.passportDetails.partnerName);
+            if (!requestValue.payload.token) {
+                $("token_invalid").text("Token signature was invalid.  Proceed with caution.");
+            }
+
+            $("#login_modal").modal({
+                closable: false,
+                onApprove: async function () {
+                    let claimTypeIds = new Array();
+                    $("#login_claim_types").find("input[type=checkbox]").each(function () {
+                        if ($(this).prop("checked")) {
+                            let id = $(this).attr("id").replace("loginclaim_", "");
+                            claimTypeIds.push(parseInt(id));
+                        }
+                    });
+
+                    showWait("Sending Login Response...");
+                    setTimeout(async function () {
+                        try {
+                            let responseValue = await getPassportLoginResponse(requestValue, claimTypeIds);
+                            let message = {
+                                action: 'sendBridgeLoginResponse',
+                                loginResponse: responseValue.payload
+                            };
+                            await sendMessageToTab(sender, message);
+                            hideWait();
+                            if (_params) {
+                                loadPage("main");
+                            }
+                        }
+                        catch (err) {
+                            alert("Error sending login response: " + err);
+                            hideWait();
+                            if (_params) {
+                                loadPage("main");
+                            }
+                        }
+                    }, 50);
+                },
+                onDeny: async function () {
+                    hideWait();
+                    if (_params) {
+                        loadPage("main");
+                    }
+                }
+            }).modal("show");
         }
-    }).modal("show");
+        catch (err) {
+            alert("Error processing login request: " + err);
+        }
+    }, 50);
 }
 
 function getLoginClaimItem(missingClaimTypes, claimType) {

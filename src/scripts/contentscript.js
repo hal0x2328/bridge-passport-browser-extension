@@ -4,7 +4,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.action == 'sendBridgeLoginResponse') {
     var event = new CustomEvent("bridge-protocol-login-response", {
       detail: {
-        responseValue: request.responseValue
+        loginResponse: request.loginResponse
       }
     });
     document.dispatchEvent(event);
@@ -13,7 +13,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.action == 'sendBridgePaymentResponse') {
     var event = new CustomEvent("bridge-protocol-payment-response", {
       detail: {
-        transactionId: request.transactionId
+        paymentResponse: request.paymentResponse
       }
     });
     document.dispatchEvent(event);
@@ -32,16 +32,8 @@ document.addEventListener("bridge-protocol-login-request", function (data) {
 });
 
 document.addEventListener("bridge-protocol-payment-request", function (data) {
-  if (!data.detail.paymentIdentifier) {
-    alert("paymentIdentifier was not provided");
-    return;
-  }
-  if (!data.detail.paymentAmount) {
-    alert("paymentAmount was not provided");
-    return;
-  }
-  if (!data.detail.paymentAddress) {
-    alert("paymentAddress was not provided");
+  if (!data.detail.paymentRequest) {
+    alert("paymentRequest was not provided");
     return;
   }
 

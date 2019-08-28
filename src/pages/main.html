@@ -189,24 +189,31 @@
     <!-- End Content Templates -->
 
     <!-- Modals -->
-    <div id="login_modal" class="ui  modal">
+    <div id="login_modal" class="ui tiny modal">
         <div class="header inverted top aligned modal-header">
             <img class="modal-header-image" src="/images/shared/bridge-token.png" />
             Login with Bridge Passport
         </div>
         <div class="content">
-            <div>Requested Claim Types</div>
-            <div id="login_claim_types"></div>
-            <div>Passport Info</div>
-            <div>
-                <div id="loginrequest_passport_id"></div>
-                <div id="loginrequest_partner_name"></div>
+            <div class="ui segment basic form" style="padding:0px !important;">
+                <div class="field">
+                    <label>Requesting Passport Id:</label>
+                    <span id="loginrequest_passport_id"></span>
+                </div>
+                <div class="field">
+                    <label>Requesting Partner Name:</label>
+                    <span id="loginrequest_partner_name"></span>
+                </div>
+                <div class="field">
+                    <label>Requested Claim Types:</label>
+                    <div id="login_claim_types" class="ui segment basic" style="padding:0px !important;"></div>
+                </div>
             </div>
         </div>
         <div class="warnings">
             <div class="token_invalid"></div>
         </div>
-        <div class="actions">
+        <div class="actions form">
             <div id="login_cancel_button" class="ui cancel button">Cancel</div>
             <div id="login_ok_button" class="ui approve button purple">Login with Bridge Passport</div>
         </div>
@@ -236,7 +243,7 @@
         </div>
         <div class="actions">
             <div id="payment_cancel_button" class="ui cancel button">Cancel</div>
-            <div id="payment_ok_button" class="ui approve button purple">Make Paymennt</div>
+            <div id="payment_ok_button" class="ui approve button purple">Make Payment</div>
         </div>
     </div>
 
