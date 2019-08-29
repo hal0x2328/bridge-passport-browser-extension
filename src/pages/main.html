@@ -219,6 +219,64 @@
         </div>
     </div>
 
+    <div id="partner_select_modal" class="ui tiny modal">
+        <div class="header inverted top aligned modal-header">
+            <img class="modal-header-image" src="/images/shared/bridge-token.png" />
+            Select Bridge Verification Partner
+        </div>
+        <div class="ui content">
+            <div id="partner_select_dropdown" class="ui fluid search selection dropdown">
+                <input type="hidden" id="partner_select_partner_id" name="partner_select_partner_id">
+                <div class="default text">Select Verification Provider</div>
+                <i class="dropdown icon" style="vertical-align: middle;"></i>
+                <div class="menu">
+                    <div class="item" data-value="12345">
+                        <div class="ui container" style="width:100%; vertical-align: middle !important;">
+                            <div class="ui segment"
+                                style="padding:2px !important; margin:0px !important; display:inline-table !important; background-color: #50a8eb;">
+                                <img class="partner_logo_image" src="/images/shared/aver-logo-white.png"
+                                    style="width:24px;">
+                            </div>
+                            <div class="partner_name"
+                                style="display:inline-table !important; vertical-align:top !important; margin-top:10px; margin-left:4px;">
+                                GoAver.com
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="partner_select_info" class="ui segment basic form" style="margin-top:0px; display:none;">
+                <div class="field">
+                    <label>Partner Name</label>
+                    <span>Aver, LLC</span>
+                </div>
+                <div class="field">
+                    <label>Partner Website</label>
+                    <span><a id="partner_select_site_link" href="#">https://www.goaver.com</a></span>
+                </div>
+                <div class="field">
+                    <label>Pricing and Services Info</label>
+                    <span><a id="partner_select_info_link" href="#">View</a></span>
+                </div>
+                <div class="field">
+                    <label>Bridge Network Transmission Fee</label>
+                    <span>1 <img src="/images/shared/bridge-token.png" style="width:10px; margin-left:2px;"></span>
+                </div>
+                <div class="field">
+                    <p style="font-size:9px;">
+                        NOTE: The Bridge Protocol network fee is non-refundable and does not include additional fees for
+                        service that may be required by the Bridge Protocol Network Verification Providers. Please be
+                        sure to review terms and pricing prior to making your request.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="actions">
+            <div id="verification_cancel_button" class="ui cancel button">Cancel</div>
+            <div id="verification_create_button" class="ui approve button purple">Create Verification Request</div>
+        </div>
+    </div>
+
     <div id="payment_modal" class="ui tiny modal">
         <div class="header inverted top aligned modal-header">
             <img class="modal-header-image" src="/images/shared/bridge-token.png" />
@@ -238,9 +296,7 @@
                 <input id="payment_identifier" readonly>
             </div>
         </div>
-        <div class="warnings">
-
-        </div>
+        <div class="warnings"></div>
         <div class="actions">
             <div id="payment_cancel_button" class="ui cancel button">Cancel</div>
             <div id="payment_ok_button" class="ui approve button purple">Make Payment</div>

@@ -449,17 +449,74 @@ async function initVerifications() {
             $("#verification_request_list").text("Error connecting to Bridge public api. Verification requests are unavailable.");
         }
 
+
+        //TODO: This will all need to be dynamic information on the selection once more verification partners
+        //are added to the network
+        $("#create_verification_request_button").click(function () {
+            //TODO: Check balance
+
+            $("#partner_select_partner_id").val("");
+            $("#partner_select_dropdown").dropdown();
+            $("#verification_create_button").focus();
+            $("#partner_select_modal").modal({
+                closable: false,
+                onApprove: async function () {
+                    showWait("Creating Verification Request...");
+                    setTimeout(async function () {
+                        try {
+                            let partnerId = $("#partner_select_partner_id").val();
+                            let application = await createApplication(partnerId);
+                            if (!application) {
+                                alert("Could not create verification request.");
+                                hideWait();
+                                return;
+                            }
+                        }
+                        catch (err) {
+                            alert("Could not create verification request: " + err);
+                            hideWait();
+                        }
+                    }, 50);
+                },
+                onDeny: async function () {
+
+                }
+            }).modal("show");
+        });
+
+        $("#partner_select_site_link").click(function () {
+            window.open("https://www.goaver.com");
+        });
+
+        $("#partner_select_info_link").click(function () {
+            window.open("https://app.goaver.com/bridgeprotocol/info");
+        });
+        $("#partner_select_partner_id").change(function () {
+            $("#partner_select_info").show();
+        });
+
         hideRefreshSectionProgress($("#refresh_verifications_button"));
         resolve();
     });
 }
 
 function getApplicationItem(application) {
+    let partnerColor = "rgba(144,64,153,1)";
+    let partnerIcon = "/images/shared/bridge-token-white.png";
+    //TODO: change once Aver is on the network
+    if(application.verificationPartner == "12345"){
+        application.verificationPartnerName = "GoAver.com";
+        partnerColor = "#50a8eb";
+        partnerIcon = "/images/shared/aver-logo-white.png";
+    }
+
     var applicationItem = $(_applicationTemplate).clone();
     var link = $(applicationItem).find(".application-link");
     link.click(function () {
         alert("Show application details");
     })
+    $(applicationItem).find(".bridge-application-icon-container").css("background-color",partnerColor);
+    $(applicationItem).find(".bridge-application-icon-container").find("img").attr("src",partnerIcon);
     $(applicationItem).find(".application-status").text("Status: " + makeStringReadable(application.status));
     $(applicationItem).find(".application-partner").text("Partner: " + application.verificationPartnerName);
     var createdDate = new Date(application.createdOn * 1000);
