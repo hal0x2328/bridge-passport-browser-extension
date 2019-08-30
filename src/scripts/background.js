@@ -1,7 +1,7 @@
 var _settings = {
   lockPassport: false,
-  apiBaseUrl: "https://app.bridgeprotocol.io/api",
-  explorerBaseUrl: "https://app.bridgeprotocol.io/explorer",
+  apiBaseUrl: BridgeProtocol.Constants.bridgeApiUrl,
+  explorerBaseUrl: BridgeProtocol.Constants.bridgeExplorerUrl,
 }
 
 //Cached passport
@@ -209,7 +209,7 @@ _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) 
     getDecryptedClaims().then(sendResponse);
     return true;
   }
-  
+
   if (request.action == "getApplications") {
     getApplications().then(sendResponse);
     return true;

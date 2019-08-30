@@ -39,6 +39,8 @@ $(function () {
 });
 
 async function Init() {
+    window.focus();
+
     _settings = await getSettings();
     _passport = await getPassport();
     _passphrase = await getPassphrase();
@@ -118,12 +120,12 @@ async function initClaimsImport(sender, claimsImportRequest) {
                     });
 
                     //Nothing to import
-                    if(claimPackages.length == 0){
+                    if (claimPackages.length == 0) {
                         hideWait();
                         return;
                     }
-                        
- 
+
+
                     showWait("Updating passport claim packages...");
                     setTimeout(async function () {
                         try {
@@ -172,20 +174,20 @@ async function initPayment(sender, paymentRequest) {
                 onApprove: async function () {
                     showWait("Sending Payment to Blockchain...");
                     setTimeout(async function () {
-                        let txid = "12345";
-                        //try {
-                        //    let blockchainHelper = new BridgeProtocol.Blockchain(_settings.apiBaseUrl, _passport, _passphrase);
-                        //    txid = await blockchainHelper.sendPayment("NEO", parseInt(amount), address, identifier, false);
-                        //    if (!txid) {
-                        //        alert("Error sending payment.");
-                        //        hideWait();
-                        //        return;
-                        //    }
-                        //}
-                        //catch (err) {
-                        //    alert("Error sending payment: " + err);
-                        //    hideWait();
-                        // }
+                        let txid;
+                        try {
+                            let blockchainHelper = new BridgeProtocol.Blockchain(_settings.apiBaseUrl, _passport, _passphrase);
+                            txid = await blockchainHelper.sendPayment("NEO", parseInt(amount), address, identifier, false);
+                            if (!txid) {
+                                alert("Error sending payment.");
+                                hideWait();
+                                return;
+                            }
+                        }
+                        catch (err) {
+                            alert("Error sending payment: " + err);
+                            hideWait();
+                        }
 
                         showWait("Sending Payment Transaction Information", false);
                         try {
@@ -528,7 +530,9 @@ async function initVerifications() {
 
         //TODO: This will all need to be dynamic information on the selection once more verification partners
         //are added to the network
-        $("#create_verification_request_button").click(function () {
+        $("#create_verification_request_button").click(async function () {
+            let fee = await getNetworkFee();
+            fee = parseInt(fee);
             //TODO: Check balance
 
             $("#partner_select_partner_id").val("");
@@ -549,8 +553,40 @@ async function initVerifications() {
                             }
 
                             //Send the payment and wait
+                            showWait("Sending Network Fee Payment Transaction...");
+                            setTimeout(async function () {
+                                let txid;
+                                let blockchainHelper = new BridgeProtocol.Blockchain(_settings.apiBaseUrl, _passport, _passphrase);
+                                try {          
+                                    txid = await blockchainHelper.sendPayment("NEO", fee, BridgeProtocol.Constants.bridgeContractAddress, application.id, false);
+                                    if (!txid) {
+                                        alert("Error sending payment transaction.");
+                                        hideWait();
+                                        return;
+                                    }
+                                }
+                                catch (err) {
+                                    alert("Error sending payment transaction: " + err);
+                                    hideWait();
+                                }
 
-                            //Get the txId and update the application
+                                //Update the network transaction Id
+                                application = await updateApplicationTransaction(application.id, "NEO", txid);
+                                if (!application) {
+                                    alert("Error updating application transaction");
+                                    hideWait();
+                                    return;
+                                }
+
+                                let status = await blockchainHelper.waitTransactionStatus("NEO", txid, fee,  BridgeProtocol.Constants.bridgeContractAddress, application.id);
+                                if(!status){
+                                    alert("Payment failed.");
+                                    hideWait();
+                                    return;
+                                }
+
+                                alert("Payment success.");
+                            }, 50);
                         }
                         catch (err) {
                             alert("Could not create verification request: " + err);
