@@ -121,6 +121,12 @@ _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) 
     return;
   }
 
+  if(request.action == "claimsImport"){
+    if(typeof popupWindowId === 'number'){
+      _browser.runtime.sendMessage({target:"popup", action:"claimsImport", sender: sender.tab.id, claimsImportRequest: request.detail.claimsImportRequest})
+    }
+  }
+
   if (request.action == "openPopup") {
     openPopup(request.pageName, request.params);
     return;
@@ -203,7 +209,7 @@ _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) 
     getDecryptedClaims().then(sendResponse);
     return true;
   }
-
+  
   if (request.action == "getApplications") {
     getApplications().then(sendResponse);
     return true;

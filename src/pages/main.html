@@ -119,13 +119,16 @@
             </div>
         </div>
         <div class="ui segment claim-template" style="padding:2px; margin:2px;">
+            <div class="claim-checkbox-container" style="display:none;">
+                <input type="checkbox" class="claim-type-id">
+            </div>
             <div class="bridge-claim-icon-container">
                 <img src="/images/shared/bridge-token-white.png" style="width:34px; margin:10px;">
             </div>
-            <div style="display:inline-table; vertical-align:top; margin-left:4px;">
-                <div class="claim-info claim-name"></div>
-                <div class="claim-info claim-expires"></div>
-                <div class="claim-info claim-signature">Verified By: <span class="claim-signature-link"></span></div>
+            <div style="display:inline-table; vertical-align:top; margin-left:4px; height:100%;">
+                <div class="claim-info"><span class="claim-type-name"></span>: <span class="claim-value"></span></div>
+                <div class="claim-info">Verified On: <span class="claim-verified-on"></span></div>
+                <div class="claim-info">Verified By: <span class="claim-verified-by"></span></div>
             </div>
         </div>
         <div class="ui segment transaction-template" style="padding:2px; margin:2px;">
@@ -300,6 +303,25 @@
         <div class="actions">
             <div id="payment_cancel_button" class="ui cancel button">Cancel</div>
             <div id="payment_ok_button" class="ui approve button purple">Make Payment</div>
+        </div>
+    </div>
+
+    <div id="claims_import_modal" class="ui tiny modal">
+        <div class="header inverted top aligned modal-header">
+            <img class="modal-header-image" src="/images/shared/bridge-token.png" />
+            Import Claims to Passport
+        </div>
+        <div class="ui content">
+            <div class="ui form">
+                <div class="field">
+                    <div id="claims_import_list"></div>
+                </div>
+            </div>
+        </div>
+        <div class="warnings"></div>
+        <div class="actions">
+            <div id="claims_import_cancel_button" class="ui cancel button">Cancel</div>
+            <div id="claims_import_ok_button" class="ui approve button purple">Import Selected Claims</div>
         </div>
     </div>
 

@@ -41,3 +41,13 @@ document.addEventListener("bridge-protocol-payment-request", function (data) {
   chrome.runtime.sendMessage({ target: "background", action: "payment", detail: data.detail });
 });
 
+document.addEventListener("bridge-protocol-claims-import-request", function (data) {
+  if (!data.detail.claimsImportRequest) {
+    alert("claimsImportRequest was not provided");
+    return;
+  }
+
+  console.log('Bridge Protocol Content Script: Claims import request received: ' + JSON.stringify(data.detail));
+  chrome.runtime.sendMessage({ target: "background", action: "claimsImport", detail: data.detail });
+});
+

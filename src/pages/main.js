@@ -25,6 +25,11 @@ _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) 
         initPayment(request.sender, request.paymentRequest);
     }
 
+    if (request.action === "claimsImport") {
+        window.focus();
+        initClaimsImport(request.sender, request.claimsImportRequest);
+    }
+
     sendResponse();
 });
 
@@ -70,6 +75,78 @@ async function Init() {
     }
 
     hideWait();
+}
+
+async function initClaimsImport(sender, claimsImportRequest) {
+    showWait("Evaluating claims for import, please wait");
+    setTimeout(async function () {
+        try {
+            let claimHelper = new BridgeProtocol.Claim(_settings.apiBaseUrl, _passport, _passphrase);
+            let res = await claimHelper.verifyClaimsImportRequest(claimsImportRequest);
+            let claims = res.payload.claimsImportRequest.claims;
+            let decryptedClaims = [];
+
+            //Decrypt the packages for use
+            for (let i = 0; i < claims.length; i++) {
+                let decryptedClaim = await claimHelper.decryptClaimPackage(claims[i]);
+                decryptedClaims.push(decryptedClaim);
+            }
+
+            //Populate the objects
+            decryptedClaims = await getClaimsObjects(decryptedClaims);
+
+            if (decryptedClaims && decryptedClaims.length > 0) {
+                $("#claims_import_list").empty();
+                for (let i = 0; i < decryptedClaims.length; i++) {
+                    $("#claims_import_list").append(await getClaimItem(decryptedClaims[i], true, i));
+                }
+            }
+            else {
+                $("#claims_import_list").empty();
+                $("#claims_import_list").text("No verified information found");
+            }
+
+            $("#claims_import_modal").modal({
+                closable: false,
+                onApprove: async function () {
+                    let claimPackages = new Array();
+                    $("#claims_import_list").find("input[type=checkbox]").each(function () {
+                        if ($(this).prop("checked")) {
+                            let idx = $(this).attr("id").replace("claim_", "");
+                            claimPackages.push(claims[idx]);
+                        }
+                    });
+
+                    //Nothing to import
+                    if(claimPackages.length == 0){
+                        hideWait();
+                        return;
+                    }
+                        
+ 
+                    showWait("Updating passport claim packages...");
+                    setTimeout(async function () {
+                        try {
+                            await updateClaimPackages(claimPackages);
+                            initClaims();
+                        }
+                        catch (err) {
+                            alert("Could not update passport claim packages: " + err);
+                            hideWait();
+                        }
+                    }, 50);
+
+                    hideWait();
+                },
+                onDeny: async function () {
+                    hideWait();
+                }
+            }).modal("show");
+        }
+        catch (err) {
+            alert("Error processing payment request: " + err);
+        }
+    }, 50);
 }
 
 async function initPayment(sender, paymentRequest) {
@@ -314,7 +391,7 @@ async function initClaims() {
         if (claims && claims.length > 0) {
             $("#claims_list").empty();
             for (let i = 0; i < claims.length; i++) {
-                $("#claims_list").append(getClaimItem(claims[i]));
+                $("#claims_list").append(await getClaimItem(claims[i]));
             }
         }
         else {
@@ -440,7 +517,7 @@ async function initVerifications() {
             }
 
             for (let i = 0; i < res.applications.length; i++) {
-                var item = getApplicationItem(res.applications[i]);
+                var item = await getApplicationItem(res.applications[i]);
                 $("#verification_request_list").append(item);
             }
         }
@@ -448,7 +525,6 @@ async function initVerifications() {
             $("#verification_request_list").empty();
             $("#verification_request_list").text("Error connecting to Bridge public api. Verification requests are unavailable.");
         }
-
 
         //TODO: This will all need to be dynamic information on the selection once more verification partners
         //are added to the network
@@ -471,6 +547,10 @@ async function initVerifications() {
                                 hideWait();
                                 return;
                             }
+
+                            //Send the payment and wait
+
+                            //Get the txId and update the application
                         }
                         catch (err) {
                             alert("Could not create verification request: " + err);
@@ -500,23 +580,15 @@ async function initVerifications() {
     });
 }
 
-function getApplicationItem(application) {
-    let partnerColor = "rgba(144,64,153,1)";
-    let partnerIcon = "/images/shared/bridge-token-white.png";
-    //TODO: change once Aver is on the network
-    if(application.verificationPartner == "12345"){
-        application.verificationPartnerName = "GoAver.com";
-        partnerColor = "#50a8eb";
-        partnerIcon = "/images/shared/aver-logo-white.png";
-    }
-
+async function getApplicationItem(application) {
+    var partner = await getPartnerInfo(application.verificationPartner);
     var applicationItem = $(_applicationTemplate).clone();
     var link = $(applicationItem).find(".application-link");
     link.click(function () {
         alert("Show application details");
     })
-    $(applicationItem).find(".bridge-application-icon-container").css("background-color",partnerColor);
-    $(applicationItem).find(".bridge-application-icon-container").find("img").attr("src",partnerIcon);
+    $(applicationItem).find(".bridge-application-icon-container").css("background-color", partner.color);
+    $(applicationItem).find(".bridge-application-icon-container").find("img").attr("src", partner.icon);
     $(applicationItem).find(".application-status").text("Status: " + makeStringReadable(application.status));
     $(applicationItem).find(".application-partner").text("Partner: " + application.verificationPartnerName);
     var createdDate = new Date(application.createdOn * 1000);
@@ -552,12 +624,18 @@ function initSettings() {
     });
 }
 
-function getClaimItem(claim) {
+async function getClaimItem(claim, showCheckbox, idx) {
+    var partner = await getPartnerInfo(claim.signedById);
     var claimItem = $(_claimTemplate).clone();
-    $(claimItem).find(".claim-name").html(claim.claimTypeName + ": " + claim.claimValue);
-    $(claimItem).find(".claim-expires").text("Verified On: " + new Date(claim.createdOn * 1000).toLocaleDateString());
-    $(claimItem).find(".claim-signature-link").text(claim.signedByName);
-    $(claimItem).find(".partner-details-link").attr("data-passportid", claim.signedById);
+    if (showCheckbox) {
+        $(claimItem).find(".claim-checkbox-container").show();
+    }
+    $(claimItem).find(".claim-type-id").text(claim.claimTypeId);
+    $(claimItem).find(".claim-type-id").attr("id", "claim_" + idx);
+    $(claimItem).find(".claim-type-name").text(claim.claimTypeName);
+    $(claimItem).find(".claim-value").text(claim.claimValue);
+    $(claimItem).find(".claim-verified-on").text(new Date(claim.createdOn * 1000).toLocaleDateString());
+    $(claimItem).find(".claim-verified-by").text(claim.signedByName);
     return claimItem;
 }
 

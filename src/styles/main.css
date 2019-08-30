@@ -67,6 +67,12 @@ button{
     border-radius:5px;
 }
 
+.claim-checkbox-container{
+    display:inline-table;
+    vertical-align:top; 
+    padding:22px 6px 0px 6px;
+}
+
 .neo-address-icon-container{
     display:inline-table; 
     background-color: #58bd00; 
@@ -93,6 +99,7 @@ button{
 .claim-info{
     width:100% !important;
     font-size:11px !important;
+    height:19px !important;
 }
 
 .transaction-info{

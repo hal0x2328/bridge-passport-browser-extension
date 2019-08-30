@@ -201,6 +201,47 @@ function checkMissingLoginClaimType(missingClaimTypes, claimTypeId) {
 	return false;
 }
 
+async function getClaimsObjects(claims) {
+	if (!claims || claims.length == 0)
+		return claims;
+
+	let passportHelper = new BridgeProtocol.Passport(_settings.apiBaseUrl, _passport, _passphrase);
+	let claimHelper = new BridgeProtocol.Claim(_settings.apiBaseUrl, _passport, _passphrase);
+	let partnerHelper = new BridgeProtocol.Partner(_settings.apiBaseUrl, _passport, _passphrase);
+	for (let i = 0; i < claims.length; i++) {
+		claims[i].claimTypeName = claims[i].claimTypeId;
+		var type = await claimHelper.getClaimType(claims[i].claimTypeId);
+		if (type) {
+			claims[i].claimTypeName = type.name;
+		}
+
+		var partnerId = await passportHelper.getPassportIdForPublicKey(claims[i].signedByKey);
+		if (partnerId) {
+			claims[i].signedById = partnerId;
+			var partner = await partnerHelper.getPartner(partnerId);
+			if (partner) {
+				claims[i].signedByName = partner.name;
+			}
+		}
+	}
+
+	return claims;
+}
+
+async function getPartnerInfo(partnerId){
+	let partnerHelper = new BridgeProtocol.Partner(_settings.apiBaseUrl, _passport, _passphrase);
+    let partner = await partnerHelper.getPartner(partnerId);
+	if(partner.name == "Aver"){
+        partner.color = "#50a8eb";
+        partner.icon = "/images/shared/aver-logo-white.png";
+	}
+	else if(partner.name == "Bridge Protocol"){
+		partner.color = "rgba(144,64,153,1)";
+		partner.icon = "/images/shared/bridge-token-white.png";
+	}
+	return partner;
+}
+
 //Background script messaging helpers
 async function getBridgePassportId() {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'getBridgePassportId' });
