@@ -193,6 +193,56 @@
     <!-- End Content Templates -->
 
     <!-- Modals -->
+    <div id="application_details_modal" class="ui tiny modal">
+        <div class="header inverted top aligned modal-header">
+            <img class="modal-header-image" src="/images/shared/bridge-token.png" />
+            Verification Request Details
+        </div>
+        <div class="ui content form">
+            <div class="field">
+                <label>Verification Partner</label>
+                <span class="application-partner"></span>
+            </div>
+            <div class="field">
+                <label>Verification Id</label>
+                <span class="application-id"></span>
+            </div>
+            <div class="field">
+                <label>Verification Partner Link</label>
+                <a href="#" class="application-url" style="overflow-wrap:break-word;"></a>
+            </div>
+            <div class="field">
+                <label>Created On</label>
+                <span class="application-created-on"></span>
+            </div>
+            <div class="field">
+                <label>Status</label>
+                <span class="application-status"></span>
+            </div>
+            <div class="field">
+                <label>Bridge Network Fee</label>
+                <span>
+                    <img src="/images/shared/bridge-token.png" style="width:14px; padding-top:4px;">
+                    <span class="application-payment-fee"></span>    
+                </span>
+            </div>
+            <div class="field">
+                <label>Payment Network</label>
+                <span>
+                    <img src="/images/shared/neo-logo.png" style="width:14px; padding-top:6px;">
+                    <span class="application-payment-network"></span>
+                </span>
+            </div>
+            <div class="field">
+                <label>Payment Transaction Id <a href="#" class="application-payment-transaction-link" style="float:right;"><i class="ui icon alternate external"></i></a></label>
+                <span class="application-payment-transaction"></span>
+            </div>
+        </div>
+        <div class="actions">
+            <div id="application_cancel_button" class="ui cancel button">Close</div>
+        </div>
+    </div>
+
     <div id="login_modal" class="ui tiny modal">
         <div class="header inverted top aligned modal-header">
             <img class="modal-header-image" src="/images/shared/bridge-token.png" />

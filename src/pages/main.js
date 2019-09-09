@@ -388,6 +388,10 @@ async function initPassportDetails() {
 
 async function initClaims() {
     return new Promise(async (resolve, reject) => {
+        $(".claim-type-details-link").click(function(){
+
+        });
+
         _claimTemplate = $(".claim-template").first();
         var claims = await getPassportClaims();
         if (claims && claims.length > 0) {
@@ -619,16 +623,31 @@ async function initVerifications() {
 async function getApplicationItem(application) {
     var partner = await getPartnerInfo(application.verificationPartner);
     var applicationItem = $(_applicationTemplate).clone();
-    var link = $(applicationItem).find(".application-link");
+    var link = $(applicationItem).find(".application-details-link");
+    var createdDate = new Date(application.createdOn * 1000);
+    var created = createdDate.toLocaleDateString() + " " + createdDate.toLocaleTimeString();
     link.click(function () {
-        alert("Show application details");
+        //Init the modal
+        $("#application_details_modal").modal("show");
+        $("#application_details_modal").find(".application-id").text(application.id);
+        $("#application_details_modal").find(".application-url").text(application.url);
+        $("#application_details_modal").find(".application-url").click(function(){
+            window.open(application.url);
+        });
+        $("#application_details_modal").find(".application-created-on").text(created);
+        $("#application_details_modal").find(".application-status").text(makeStringReadable(application.status));
+        $("#application_details_modal").find(".application-partner").text(application.verificationPartnerName);
+        $("#application_details_modal").find(".application-payment-network").text(application.transactionNetwork);
+        $("#application_details_modal").find(".application-payment-fee").text(application.transactionFee);
+        $("#application_details_modal").find(".application-payment-transaction").text(application.transactionId);
+        $("#application_details_modal").find(".application-payment-transaction-link").click(function(){
+            window.open("https://neoscan.io/transaction/" + application.transactionId);
+        });
     })
     $(applicationItem).find(".bridge-application-icon-container").css("background-color", partner.color);
     $(applicationItem).find(".bridge-application-icon-container").find("img").attr("src", partner.icon);
     $(applicationItem).find(".application-status").text("Status: " + makeStringReadable(application.status));
     $(applicationItem).find(".application-partner").text("Partner: " + application.verificationPartnerName);
-    var createdDate = new Date(application.createdOn * 1000);
-    var created = createdDate.toLocaleDateString() + " " + createdDate.toLocaleTimeString();
     $(applicationItem).find(".application-created").text("Created: " + created);
     return applicationItem;
 }

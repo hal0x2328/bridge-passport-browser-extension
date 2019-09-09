@@ -167,3 +167,9 @@ button{
     right:0px; 
     top:0px;
 }
+
+.claim-type-details-link
+{
+    position:absolute;
+    right:0px;   
+}
