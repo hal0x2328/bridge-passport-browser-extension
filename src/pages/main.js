@@ -590,6 +590,9 @@ async function initVerifications() {
                                 }
 
                                 alert("Payment success.");
+                                await initVerifications();
+                                await showApplicationDetails(application.id);
+                                hideWait();
                             }, 50);
                         }
                         catch (err) {
@@ -627,29 +630,36 @@ async function getApplicationItem(application) {
     var createdDate = new Date(application.createdOn * 1000);
     var created = createdDate.toLocaleDateString() + " " + createdDate.toLocaleTimeString();
     link.click(function () {
-        //Init the modal
-        $("#application_details_modal").modal("show");
-        $("#application_details_modal").find(".application-id").text(application.id);
-        $("#application_details_modal").find(".application-url").text(application.url);
-        $("#application_details_modal").find(".application-url").click(function(){
-            window.open(application.url);
-        });
-        $("#application_details_modal").find(".application-created-on").text(created);
-        $("#application_details_modal").find(".application-status").text(makeStringReadable(application.status));
-        $("#application_details_modal").find(".application-partner").text(application.verificationPartnerName);
-        $("#application_details_modal").find(".application-payment-network").text(application.transactionNetwork);
-        $("#application_details_modal").find(".application-payment-fee").text(application.transactionFee);
-        $("#application_details_modal").find(".application-payment-transaction").text(application.transactionId);
-        $("#application_details_modal").find(".application-payment-transaction-link").click(function(){
-            window.open("https://neoscan.io/transaction/" + application.transactionId);
-        });
-    })
+        showApplicationDetails(application.id);
+    });
     $(applicationItem).find(".bridge-application-icon-container").css("background-color", partner.color);
     $(applicationItem).find(".bridge-application-icon-container").find("img").attr("src", partner.icon);
     $(applicationItem).find(".application-status").text("Status: " + makeStringReadable(application.status));
     $(applicationItem).find(".application-partner").text("Partner: " + application.verificationPartnerName);
     $(applicationItem).find(".application-created").text("Created: " + created);
     return applicationItem;
+}
+
+async function showApplicationDetails(applicationId){
+    let application = await getApplication(applicationId);
+    var createdDate = new Date(application.createdOn * 1000);
+    var created = createdDate.toLocaleDateString() + " " + createdDate.toLocaleTimeString();
+    //Init the modal
+    $("#application_details_modal").modal("show");
+    $("#application_details_modal").find(".application-id").text(application.id);
+    $("#application_details_modal").find(".application-url").text(application.url);
+    $("#application_details_modal").find(".application-url").click(function(){
+        window.open(application.url);
+    });
+    $("#application_details_modal").find(".application-created-on").text(created);
+    $("#application_details_modal").find(".application-status").text(makeStringReadable(application.status));
+    $("#application_details_modal").find(".application-partner").text(application.verificationPartnerName);
+    $("#application_details_modal").find(".application-payment-network").text(application.transactionNetwork);
+    $("#application_details_modal").find(".application-payment-fee").text(application.transactionFee);
+    $("#application_details_modal").find(".application-payment-transaction").text(application.transactionId);
+    $("#application_details_modal").find(".application-payment-transaction-link").click(function(){
+        window.open("https://neoscan.io/transaction/" + application.transactionId);
+    });
 }
 
 function initSidebar() {
