@@ -506,6 +506,9 @@ function initUnlock() {
 
 async function initVerifications() {
     return new Promise(async (resolve, reject) => {
+        let fee = await getNetworkFee();
+        fee = new BigNumber(fee * .00000001);
+
         _applicationTemplate = $(".application-template").first();
         let res = await getApplications();
         if (res.error) {
@@ -535,13 +538,12 @@ async function initVerifications() {
         //TODO: This will all need to be dynamic information on the selection once more verification partners
         //are added to the network
         $("#create_verification_request_button").click(async function () {
-            let fee = await getNetworkFee();
-            fee = parseInt(fee);
             //TODO: Check balance
 
             $("#partner_select_partner_id").val("");
             $("#partner_select_dropdown").dropdown();
             $("#verification_create_button").focus();
+            $("#partner_network_fee").text(fee);
             $("#partner_select_modal").modal({
                 closable: false,
                 onApprove: async function () {
