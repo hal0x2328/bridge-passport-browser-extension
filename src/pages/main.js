@@ -507,7 +507,7 @@ function initUnlock() {
 async function initVerifications() {
     return new Promise(async (resolve, reject) => {
         let fee = await getNetworkFee();
-        fee = new BigNumber(fee * .00000001);
+        let adjFee = new BigNumber(fee * .00000001);
 
         _applicationTemplate = $(".application-template").first();
         let res = await getApplications();
@@ -599,10 +599,11 @@ async function initVerifications() {
                                     return;
                                 }
 
-                                alert("Payment success.");
-                                await initVerifications();
-                                await showApplicationDetails(application.id);
-                                hideWait();
+                                setTimeout(async function () {
+                                    showWait("Loading verification details...");
+                                    await initVerifications();
+                                    await showApplicationDetails(application.id);
+                                }, 50);
                             }, 50);
                         }
                         catch (err) {
@@ -658,6 +659,19 @@ async function showApplicationDetails(applicationId){
     $("#application_details_modal").find(".application-payment-transaction-link").click(function(){
         window.open("https://neoscan.io/transaction/" + application.transactionId);
     });
+
+    if(application.status != "networkFeePaymentReceived")
+    {
+        $("#application_details_modal").find(".application-status-action-link").text("Send to Partner");
+        $("#application_details_modal").find(".application-status-action-link").click(function(){
+            setTimeout(async function () {
+                $("#application_details_modal").modal("hide");
+                showWait("Re-attempting to send to partner...");
+                let res = await resendApplication(application.id);
+                showApplicationDetails(application.Id);
+            }, 50);
+        });
+    }
 }
 
 function initSidebar() {
