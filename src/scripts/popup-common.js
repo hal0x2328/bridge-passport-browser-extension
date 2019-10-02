@@ -231,11 +231,7 @@ async function getClaimsObjects(claims) {
 async function getPartnerInfo(partnerId){
 	let partnerHelper = new BridgeProtocol.Partner(_settings.apiBaseUrl, _passport, _passphrase);
     let partner = await partnerHelper.getPartner(partnerId);
-	if(partner.name == "Aver"){
-        partner.color = "#50a8eb";
-        partner.icon = "/images/shared/aver-logo-white.png";
-	}
-	else if(partner.name == "Bridge Protocol"){
+	if(partner.name == "Bridge Protocol Corporation"){
 		partner.color = "rgba(144,64,153,1)";
 		partner.icon = "/images/shared/bridge-token-white.png";
 	}

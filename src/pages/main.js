@@ -544,6 +544,14 @@ async function initVerifications() {
             $("#partner_select_dropdown").dropdown();
             $("#verification_create_button").focus();
             $("#partner_network_fee").text(fee);
+            
+            $("#partner_name").text("Bridge Protocol");
+            $("#partner_select_info_link").click(function () {
+                window.open("https:///bridgeprotocol.azurewebsites.net/verification");
+            });
+            $("#partner_select_partner_id").change(function () {
+                $("#partner_select_info").show();
+            });
             $("#partner_select_modal").modal({
                 closable: false,
                 onApprove: async function () {
@@ -608,18 +616,6 @@ async function initVerifications() {
                 }
             }).modal("show");
         });
-
-        $("#partner_select_site_link").click(function () {
-            window.open("https://www.goaver.com");
-        });
-
-        $("#partner_select_info_link").click(function () {
-            window.open("https://app.goaver.com/bridgeprotocol/info");
-        });
-        $("#partner_select_partner_id").change(function () {
-            $("#partner_select_info").show();
-        });
-
         hideRefreshSectionProgress($("#refresh_verifications_button"));
         resolve();
     });
