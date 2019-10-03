@@ -80,6 +80,9 @@ async function Init() {
 }
 
 async function initClaimsImport(sender, claimsImportRequest) {
+    //Hide any open dialogs
+    hideAllModals();
+
     showWait("Evaluating claims for import, please wait");
     setTimeout(async function () {
         try {
@@ -152,6 +155,9 @@ async function initClaimsImport(sender, claimsImportRequest) {
 }
 
 async function initPayment(sender, paymentRequest) {
+    //Hide any open dialogs
+    hideAllModals();
+
     showWait("Payment request received, please wait");
     setTimeout(async function () {
         try {
@@ -226,6 +232,9 @@ async function initPayment(sender, paymentRequest) {
 }
 
 async function initLogin(sender, loginRequest) {
+    //Hide any open dialogs
+    hideAllModals();
+
     showWait("Login request received, please wait");
     setTimeout(async function () {
         try {
@@ -234,6 +243,9 @@ async function initLogin(sender, loginRequest) {
             _loginClaimTypeTemplate = $(".login-claim-type-template").first();
 
             $("#login_claim_types").empty();
+            if(!requestValue.claimTypes || requestValue.claimTypes.length == 0)
+                $("#login_claim_types").text("None requested");
+         
             for (let i = 0; i < requestValue.claimTypes.length; i++) {
                 let item = getLoginClaimItem(requestValue.missingClaimTypes, requestValue.claimTypes[i]);
                 $("#login_claim_types").append(item);
@@ -674,6 +686,8 @@ async function showApplicationDetails(applicationId) {
     //Init the modal
     $("#application_details_modal").modal("show");
     $("#application_details_modal").find(".application-id").text(application.id);
+
+    $("#application_details_modal").find(".application-url").unbind();
     $("#application_details_modal").find(".application-url").text(application.url);
     $("#application_details_modal").find(".application-url").click(function () {
         window.open(application.url);
@@ -684,6 +698,7 @@ async function showApplicationDetails(applicationId) {
     $("#application_details_modal").find(".application-payment-network").text(application.transactionNetwork);
     $("#application_details_modal").find(".application-payment-fee").text(fee);
     $("#application_details_modal").find(".application-payment-transaction").text(application.transactionId);
+    $("#application_details_modal").find(".application-payment-transaction-link").unbind();
     $("#application_details_modal").find(".application-payment-transaction-link").click(function () {
         window.open("https://neoscan.io/transaction/" + application.transactionId);
     });

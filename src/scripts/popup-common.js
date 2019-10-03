@@ -24,6 +24,16 @@ function getDecimalForExponential(num) {
 	}
 }
 
+function hideAllModals(){
+	$("#key_modal").modal("hide");
+	$("#transactions_modal").modal("hide");
+	$("#claims_import_modal").modal("hide");
+	$("#payment_modal").modal("hide");
+	$("#partner_select_modal").modal("hide");
+	$("#login_modal").modal("hide");
+	$("#application_details_modal").modal("hide");
+}
+
 function showWait(message, twoLine) {
 	if (twoLine) {
 		$("#loading_spinner").find("img").css("margin-top", "-82px");
