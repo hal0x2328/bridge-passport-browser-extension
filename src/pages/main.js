@@ -126,11 +126,11 @@ async function initClaimsImport(sender, claimsImportRequest) {
                     }
 
 
-                    showWait("Updating passport claim packages...");
+                    showWait("Updating passport claim packages");
                     setTimeout(async function () {
                         try {
                             await updateClaimPackages(claimPackages);
-                            initClaims();
+                            initClaims(true);
                         }
                         catch (err) {
                             alert("Could not update passport claim packages: " + err);
@@ -172,7 +172,7 @@ async function initPayment(sender, paymentRequest) {
             $("#payment_modal").modal({
                 closable: false,
                 onApprove: async function () {
-                    showWait("Sending Payment to Blockchain...");
+                    showWait("Sending payment to blockchain");
                     setTimeout(async function () {
                         let txid;
                         try {
@@ -256,7 +256,7 @@ async function initLogin(sender, loginRequest) {
                         }
                     });
 
-                    showWait("Sending Login Response...");
+                    showWait("Sending login response");
                     setTimeout(async function () {
                         try {
                             let responseValue = await getPassportLoginResponse(requestValue, claimTypeIds);
@@ -315,15 +315,15 @@ async function initUI() {
 
     $("#refresh_passport_button").click(async function () {
         initPassportDetails();
-        await initClaims();
+        await initClaims(true);
     });
 
     $("#refresh_blockchain_button").click(async function () {
-        await initBlockchainAddresses();
+        await initBlockchainAddresses(true);
     });
 
     $("#refresh_verifications_button").click(async function () {
-        await initVerifications();
+        await initVerifications(true);
     });
 
     //show the buttons
@@ -386,26 +386,30 @@ async function initPassportDetails() {
     });
 }
 
-async function initClaims() {
+async function initClaims(wait) {
     return new Promise(async (resolve, reject) => {
-        $(".claim-type-details-link").click(function(){
+        setTimeout(async function () {
+            if(wait)
+                showWait("Refreshing verified information");
+    
+                $(".claim-type-details-link").click(function () {});
+                _claimTemplate = $(".claim-template").first();
+                var claims = await getPassportClaims();
+                if (claims && claims.length > 0) {
+                    $("#claims_list").empty();
+                    for (let i = 0; i < claims.length; i++) {
+                        $("#claims_list").append(await getClaimItem(claims[i]));
+                    }
+                }
+                else {
+                    $("#claims_list").empty();
+                    $("#claims_list").text("No verified information found");
+                }
+                hideRefreshSectionProgress($("#refresh_passport_button"));
+                resolve();
 
-        });
-
-        _claimTemplate = $(".claim-template").first();
-        var claims = await getPassportClaims();
-        if (claims && claims.length > 0) {
-            $("#claims_list").empty();
-            for (let i = 0; i < claims.length; i++) {
-                $("#claims_list").append(await getClaimItem(claims[i]));
-            }
-        }
-        else {
-            $("#claims_list").empty();
-            $("#claims_list").text("No verified information found");
-        }
-        hideRefreshSectionProgress($("#refresh_passport_button"));
-        resolve();
+                hideWait();
+        },50);
     });
 }
 
@@ -431,48 +435,53 @@ async function getBalancesForAddress(address) {
     }
 }
 
-async function initBlockchainAddresses() {
+async function initBlockchainAddresses(wait) {
     return new Promise(async (resolve, reject) => {
-        _blockchainTemplate = $(".blockchain-template").first();
-        var blockchainHelper = new BridgeProtocol.Blockchain(_settings.apiBaseUrl, _passport, _passphrase);
-        var addresses = _passport.wallets;
-        var info = await blockchainHelper.getPassportStatus("NEO", _passport.id);
-        if (addresses) {
-            if (addresses && addresses.length > 0) {
-                $("#blockchain_list").empty();
-            }
-
-            for (let i = 0; i < addresses.length; i++) {
-                let balances = await getBalancesForAddress(addresses[i].address);
-                addresses[i].registered = false;
-                addresses[i].brdgbalance = balances.brdg;
-                addresses[i].gasbalance = balances.gas;
-                if (info) {
-                    addresses[i].registered = true;
+        setTimeout(async function () {
+            if(wait)
+                showWait("Refreshing blockchain address info");
+                _blockchainTemplate = $(".blockchain-template").first();
+                var blockchainHelper = new BridgeProtocol.Blockchain(_settings.apiBaseUrl, _passport, _passphrase);
+                var addresses = _passport.wallets;
+                var info = await blockchainHelper.getPassportStatus("NEO", _passport.id);
+                if (addresses) {
+                    if (addresses && addresses.length > 0) {
+                        $("#blockchain_list").empty();
+                    }
+        
+                    for (let i = 0; i < addresses.length; i++) {
+                        let balances = await getBalancesForAddress(addresses[i].address);
+                        addresses[i].registered = false;
+                        addresses[i].brdgbalance = balances.brdg;
+                        addresses[i].gasbalance = balances.gas;
+                        if (info) {
+                            addresses[i].registered = true;
+                        }
+                        var item = getBlockchainItem(addresses[i]);
+                        $("#blockchain_list").append(item);
+                    }
                 }
-                var item = getBlockchainItem(addresses[i]);
-                $("#blockchain_list").append(item);
-            }
-        }
-        else {
-            $("#blockchain_list").empty();
-            $("#blockchain_list").text("No blockchain addresses found");
-        }
-
-        $("#copy_wif").popup({ on: 'click' });
-        $("#copy_wif").click(function () {
-            try {
-                $("#wif_value").select();
-                document.execCommand('copy');
-                window.getSelection().removeAllRanges();
-                alert('Private Key Copied to Clipboard');
-            }
-            catch (err) {
-
-            }
-        });
-        hideRefreshSectionProgress($("#refresh_blockchain_button"));
-        resolve();
+                else {
+                    $("#blockchain_list").empty();
+                    $("#blockchain_list").text("No blockchain addresses found");
+                }
+        
+                $("#copy_wif").popup({ on: 'click' });
+                $("#copy_wif").click(function () {
+                    try {
+                        $("#wif_value").select();
+                        document.execCommand('copy');
+                        window.getSelection().removeAllRanges();
+                        alert('Private Key Copied to Clipboard');
+                    }
+                    catch (err) {
+        
+                    }
+                });
+                hideRefreshSectionProgress($("#refresh_blockchain_button"));
+                resolve();
+                hideWait();
+        },50);
     });
 }
 
@@ -484,7 +493,7 @@ function initUnlock() {
             return;
         }
 
-        showWait("Unlocking Bridge Passport...");
+        showWait("Unlocking Bridge Passport");
         setTimeout(async function () {
             try {
                 var passport = await unlockPassport(passphrase);
@@ -504,121 +513,136 @@ function initUnlock() {
     });
 }
 
-async function initVerifications() {
+async function initVerifications(wait) {
     return new Promise(async (resolve, reject) => {
-        let fee = await getNetworkFee();
-        let adjFee = new BigNumber(fee * .00000001);
+        setTimeout(async function () {
+            if (wait)
+                showWait("Refreshing verification request info");
 
-        _applicationTemplate = $(".application-template").first();
-        let res = await getApplications();
-        if (res.error) {
-            $("#create_verification_request_button").prop('disabled', true);
-        }
-        console.log(JSON.stringify(res));
+            let fee = await getNetworkFee();
+            let adjFee = new BigNumber(fee * .00000001);
 
-        if (res.applications) {
-            if (res.applications && res.applications.length > 0) {
+            _applicationTemplate = $(".application-template").first();
+            let res = await getApplications();
+            if (res.error) {
+                $("#create_verification_request_button").prop('disabled', true);
+            }
+            console.log(JSON.stringify(res));
+
+            if (res.applications) {
+                if (res.applications && res.applications.length > 0) {
+                    $("#verification_request_list").empty();
+                }
+                else {
+                    $("#verification_request_list").empty();
+                    $("#verification_request_list").text("No active verifications found");
+                }
+
+                for (let i = 0; i < res.applications.length; i++) {
+                    var item = await getApplicationItem(res.applications[i]);
+                    $("#verification_request_list").append(item);
+                }
+            }
+            else if (res.error) {
                 $("#verification_request_list").empty();
-            }
-            else {
-                $("#verification_request_list").empty();
-                $("#verification_request_list").text("No active verifications found");
+                $("#verification_request_list").text("Error connecting to Bridge public api. Verification requests are unavailable.");
             }
 
-            for (let i = 0; i < res.applications.length; i++) {
-                var item = await getApplicationItem(res.applications[i]);
-                $("#verification_request_list").append(item);
-            }
-        }
-        else if (res.error) {
-            $("#verification_request_list").empty();
-            $("#verification_request_list").text("Error connecting to Bridge public api. Verification requests are unavailable.");
-        }
+            //TODO: This will all need to be dynamic information on the selection once more verification partners
+            //are added to the network
+            $("#create_verification_request_button").click(async function () {
+                //TODO: Check balance
+                $("#partner_select_partner_id").val("");
+                $("#partner_select_dropdown").dropdown();
+                $("#verification_create_button").focus();
+                $("#partner_network_fee").text(adjFee);
 
-        //TODO: This will all need to be dynamic information on the selection once more verification partners
-        //are added to the network
-        $("#create_verification_request_button").click(async function () {
-            //TODO: Check balance
+                $("#partner_name").text("Bridge Protocol");
+                $("#partner_select_info_link").click(function () {
+                    window.open("https:///bridgeprotocol.azurewebsites.net/verification");
+                });
+                $("#partner_select_partner_id").change(function () {
+                    $("#partner_select_info").show();
+                });
+                $("#partner_select_modal").modal({
+                    closable: false,
+                    onApprove: async function () {
+                        showWait("Creating verification request");
+                        setTimeout(async function () {
+                            try {
+                                let partnerId = $("#partner_select_partner_id").val();
+                                let application = await createApplication(partnerId);
+                                if (!application) {
+                                    alert("Could not create verification request.");
+                                    hideWait();
+                                    return;
+                                }
 
-            $("#partner_select_partner_id").val("");
-            $("#partner_select_dropdown").dropdown();
-            $("#verification_create_button").focus();
-            $("#partner_network_fee").text(fee);
-            
-            $("#partner_name").text("Bridge Protocol");
-            $("#partner_select_info_link").click(function () {
-                window.open("https:///bridgeprotocol.azurewebsites.net/verification");
-            });
-            $("#partner_select_partner_id").change(function () {
-                $("#partner_select_info").show();
-            });
-            $("#partner_select_modal").modal({
-                closable: false,
-                onApprove: async function () {
-                    showWait("Creating Verification Request...");
-                    setTimeout(async function () {
-                        try {
-                            let partnerId = $("#partner_select_partner_id").val();
-                            let application = await createApplication(partnerId);
-                            if (!application) {
-                                alert("Could not create verification request.");
-                                hideWait();
-                                return;
-                            }
+                                //Send the payment and wait
+                                showWait("Sending network fee transaction");
+                                setTimeout(async function () {
+                                    let txid;
+                                    let blockchainHelper = new BridgeProtocol.Blockchain(_settings.apiBaseUrl, _passport, _passphrase);
+                                    try {
+                                        txid = await blockchainHelper.sendPayment("NEO", fee, BridgeProtocol.Constants.bridgeContractAddress, application.id, false);
+                                        if (!txid) {
+                                            alert("Error sending payment transaction.");
+                                            hideWait();
+                                            return;
+                                        }
+                                    }
+                                    catch (err) {
+                                        alert("Error sending payment transaction: " + err);
+                                        hideWait();
+                                    }
 
-                            //Send the payment and wait
-                            showWait("Sending Network Fee Payment Transaction...");
-                            setTimeout(async function () {
-                                let txid;
-                                let blockchainHelper = new BridgeProtocol.Blockchain(_settings.apiBaseUrl, _passport, _passphrase);
-                                try {          
-                                    txid = await blockchainHelper.sendPayment("NEO", fee, BridgeProtocol.Constants.bridgeContractAddress, application.id, false);
-                                    if (!txid) {
-                                        alert("Error sending payment transaction.");
+                                    //Update the network transaction Id
+                                    application = await updateApplicationTransaction(application.id, "NEO", txid);
+                                    if (!application) {
+                                        alert("Error updating application transaction");
                                         hideWait();
                                         return;
                                     }
-                                }
-                                catch (err) {
-                                    alert("Error sending payment transaction: " + err);
-                                    hideWait();
-                                }
 
-                                //Update the network transaction Id
-                                application = await updateApplicationTransaction(application.id, "NEO", txid);
-                                if (!application) {
-                                    alert("Error updating application transaction");
-                                    hideWait();
-                                    return;
-                                }
+                                    let status = await blockchainHelper.waitTransactionStatus("NEO", txid, fee, BridgeProtocol.Constants.bridgeContractAddress, application.id);
+                                    if (!status) {
+                                        alert("Payment failed.");
+                                        hideWait();
+                                        return;
+                                    }
 
-                                let status = await blockchainHelper.waitTransactionStatus("NEO", txid, fee,  BridgeProtocol.Constants.bridgeContractAddress, application.id);
-                                if(!status){
-                                    alert("Payment failed.");
-                                    hideWait();
-                                    return;
-                                }
-
-                                setTimeout(async function () {
-                                    showWait("Loading verification details...");
-                                    await initVerifications();
-                                    await showApplicationDetails(application.id);
+                                    setTimeout(async function () {
+                                        try {
+                                            showWait("Sending verification request to partner");
+                                            let res = await resendApplication(application.id);
+                                            if(!res)
+                                                throw new Error();
+                                        }
+                                        catch (err) {
+                                            alert("Unable to re-send Verification Request to Partner.  Partner may be offline, please try again later.");
+                                        }
+                                        await initVerifications(true);
+                                        await showApplicationDetails(application.id);
+                                        hideWait();
+                                    }, 50);
                                 }, 50);
-                            }, 50);
-                        }
-                        catch (err) {
-                            alert("Could not create verification request: " + err);
-                            hideWait();
-                        }
-                    }, 50);
-                },
-                onDeny: async function () {
+                            }
+                            catch (err) {
+                                alert("Could not create verification request: " + err);
+                                hideWait();
+                            }
+                        }, 50);
+                    },
+                    onDeny: async function () {
 
-                }
-            }).modal("show");
-        });
-        hideRefreshSectionProgress($("#refresh_verifications_button"));
-        resolve();
+                    }
+                }).modal("show");
+            });
+            hideRefreshSectionProgress($("#refresh_verifications_button"));
+            resolve();
+
+            hideWait();
+        }, 50);
     });
 }
 
@@ -629,7 +653,10 @@ async function getApplicationItem(application) {
     var createdDate = new Date(application.createdOn * 1000);
     var created = createdDate.toLocaleDateString() + " " + createdDate.toLocaleTimeString();
     link.click(function () {
-        showApplicationDetails(application.id);
+        setTimeout(async function () {
+            showWait("Loading verification request details");
+            showApplicationDetails(application.id);
+        }, 50);
     });
     $(applicationItem).find(".bridge-application-icon-container").css("background-color", partner.color);
     $(applicationItem).find(".bridge-application-icon-container").find("img").attr("src", partner.icon);
@@ -639,39 +666,60 @@ async function getApplicationItem(application) {
     return applicationItem;
 }
 
-async function showApplicationDetails(applicationId){
+async function showApplicationDetails(applicationId) {
     let application = await getApplication(applicationId);
     var createdDate = new Date(application.createdOn * 1000);
     var created = createdDate.toLocaleDateString() + " " + createdDate.toLocaleTimeString();
+    var fee = new BigNumber(application.transactionFee * .00000001);
     //Init the modal
     $("#application_details_modal").modal("show");
     $("#application_details_modal").find(".application-id").text(application.id);
     $("#application_details_modal").find(".application-url").text(application.url);
-    $("#application_details_modal").find(".application-url").click(function(){
+    $("#application_details_modal").find(".application-url").click(function () {
         window.open(application.url);
     });
     $("#application_details_modal").find(".application-created-on").text(created);
     $("#application_details_modal").find(".application-status").text(makeStringReadable(application.status));
     $("#application_details_modal").find(".application-partner").text(application.verificationPartnerName);
     $("#application_details_modal").find(".application-payment-network").text(application.transactionNetwork);
-    $("#application_details_modal").find(".application-payment-fee").text(application.transactionFee);
+    $("#application_details_modal").find(".application-payment-fee").text(fee);
     $("#application_details_modal").find(".application-payment-transaction").text(application.transactionId);
-    $("#application_details_modal").find(".application-payment-transaction-link").click(function(){
+    $("#application_details_modal").find(".application-payment-transaction-link").click(function () {
         window.open("https://neoscan.io/transaction/" + application.transactionId);
     });
 
-    if(application.status != "networkFeePaymentReceived")
-    {
-        $("#application_details_modal").find(".application-status-action-link").text("Send to Partner");
-        $("#application_details_modal").find(".application-status-action-link").click(function(){
+    if (!application.url) {
+        $("#application_details_modal").find(".application-url").hide();
+    }
+    else {
+        $("#application_details_modal").find(".application-url").show();
+    }
+
+    $("#application_details_modal").find(".application-status-action-link").hide();
+    if (application.status == "networkFeePaymentReceived") {
+        $("#application_details_modal").find(".application-status-action-link").text("[Re-send to Partner]");
+        $("#application_details_modal").find(".application-status-action-link").show();
+        $("#application_details_modal").find(".application-status-action-link").click(function () {
             setTimeout(async function () {
                 $("#application_details_modal").modal("hide");
-                showWait("Re-attempting to send to partner...");
-                let res = await resendApplication(application.id);
-                showApplicationDetails(application.Id);
+
+                try {
+                    showWait("Re-attempting to send to partner");
+                    let res = await resendApplication(application.id);
+                    if(!res)
+                        throw new Error();
+                }
+                catch (err) {
+                    alert("Unable to re-send Verification Request to Partner.  Partner may be offline, please try again later.");
+                }
+                await initVerifications(true);
+                await showApplicationDetails(application.id);
+                hideWait();
             }, 50);
         });
     }
+
+    hideWait();
 }
 
 function initSidebar() {
@@ -773,7 +821,7 @@ function getBlockchainItem(address) {
 }
 
 function registerAddress(address) {
-    showWait("Registering passport and address on blockchain...<br>(This may take a few minutes depending on the network)", true);
+    showWait("Registering passport and address on blockchain<br>(This may take a few minutes depending on the network)", true);
     setTimeout(async function () {
         let blockchainHelper = new BridgeProtocol.Blockchain(_settings.apiBaseUrl, _passport, _passphrase);
         let res = await blockchainHelper.addBlockchainAddress("NEO", address, true);
