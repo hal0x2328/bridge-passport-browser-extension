@@ -78,8 +78,12 @@ function makeStringReadable(str) {
 }
 
 //Utility
-async function sendMessageToTab(tabId, message) {
-	_browser.tabs.update(parseInt(tabId), { 'active': true }, async function (tab) {
+async function sendMessageToTab(tabId, message, focus) {
+	_browser.tabs.update(parseInt(tabId), { 'active': true, 'highlighted': true }, async function (tab) {
+		if(focus){
+			let tabInfo = await _browser.tabs.get(parseInt(tabId));
+			await _browser.windows.update(tabInfo.windowId, { "focused":true });
+		}
 		await _browser.tabs.sendMessage(tab.id, message);
 	});
 }

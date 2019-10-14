@@ -202,7 +202,7 @@ async function initPayment(sender, paymentRequest) {
                                 action: "sendBridgePaymentResponse",
                                 paymentResponse: responseValue
                             };
-                            await sendMessageToTab(sender, message);
+                            await sendMessageToTab(sender, message, true);
                             hideWait();
                             if (_params) {
                                 loadPage("main");
@@ -276,7 +276,7 @@ async function initLogin(sender, loginRequest) {
                                 action: 'sendBridgeLoginResponse',
                                 loginResponse: responseValue.payload
                             };
-                            await sendMessageToTab(sender, message);
+                            await sendMessageToTab(sender, message, true);
                             hideWait();
                             if (_params) {
                                 loadPage("main");
