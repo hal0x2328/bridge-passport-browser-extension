@@ -369,12 +369,14 @@ async function initPassportDetails() {
     $("#passport_id").val(_passport.id);
     $("#passport_publickey").val(_passport.key.public);
 
+    $("#unload_button").unbind();
     $("#unload_button").click(async function () {
         await removePassport();
         loadPage("createpassport");
     });
 
     $("#copy_passport_id").popup({ on: 'click' });
+    $("#copy_passport_id").unbind();
     $("#copy_passport_id").click(function () {
         try {
             $("#passport_id").select();
@@ -386,6 +388,7 @@ async function initPassportDetails() {
         }
     });
     $("#copy_public_key").popup({ on: 'click' });
+    $("#copy_public_key").unbind();
     $("#copy_public_key").click(function () {
         try {
             $("#public_key").select();
@@ -403,7 +406,7 @@ async function initClaims(wait) {
         setTimeout(async function () {
             if(wait)
                 showWait("Refreshing verified information");
-    
+                $(".claim-type-details-link").unbind();
                 $(".claim-type-details-link").click(function () {});
                 _claimTemplate = $(".claim-template").first();
                 var claims = await getPassportClaims();
@@ -479,6 +482,7 @@ async function initBlockchainAddresses(wait) {
                 }
         
                 $("#copy_wif").popup({ on: 'click' });
+                $("#copy_wif").unbind();
                 $("#copy_wif").click(function () {
                     try {
                         $("#wif_value").select();
@@ -498,6 +502,7 @@ async function initBlockchainAddresses(wait) {
 }
 
 function initUnlock() {
+    $("#unlock_passport").unbind();
     $("#unlock_passport_button").click(async function () {
         var passphrase = $("#unlock_passphrase").val();
         if (!passphrase) {
@@ -562,6 +567,7 @@ async function initVerifications(wait) {
 
             //TODO: This will all need to be dynamic information on the selection once more verification partners
             //are added to the network
+            $("#create_verification_request_button").unbind();
             $("#create_verification_request_button").click(async function () {
                 //TODO: Check balance
                 $("#partner_select_partner_id").val("");
@@ -570,6 +576,7 @@ async function initVerifications(wait) {
                 $("#partner_network_fee").text(adjFee);
 
                 $("#partner_name").text("Bridge Protocol");
+                $("#partner_select_info_link").unbind();
                 $("#partner_select_info_link").click(function () {
                     window.open("https:///bridgeprotocol.azurewebsites.net/verification");
                 });
@@ -664,6 +671,7 @@ async function getApplicationItem(application) {
     var link = $(applicationItem).find(".application-details-link");
     var createdDate = new Date(application.createdOn * 1000);
     var created = createdDate.toLocaleDateString() + " " + createdDate.toLocaleTimeString();
+    link.unbind();
     link.click(function () {
         setTimeout(async function () {
             showWait("Loading verification request details");
@@ -714,6 +722,7 @@ async function showApplicationDetails(applicationId) {
     if (application.status == "networkFeePaymentReceived") {
         $("#application_details_modal").find(".application-status-action-link").text("[Re-send to Partner]");
         $("#application_details_modal").find(".application-status-action-link").show();
+        $("#application_details_modal").find(".application-status-action-link").unbind();
         $("#application_details_modal").find(".application-status-action-link").click(function () {
             setTimeout(async function () {
                 $("#application_details_modal").modal("hide");
