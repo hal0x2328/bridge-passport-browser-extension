@@ -1,13 +1,46 @@
+//Message handling
+_browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+	if (request.target != "popup")
+		return;
+
+	if (request.action === "focus") {
+		window.focus();
+		if (request.url)
+			window.location.href = request.url;
+	}
+
+	sendResponse();
+});
+
 //UI
 document.title = 'Bridge Passport';
 
+function getDecimalForExponential(num) {
+	var num = Math.pow(2, 100);
+	var reconstruct = [];
+	while (num > 0) {
+		reconstruct.unshift(num % 10);
+		num = Math.floor(num / 10);
+	}
+}
+
+function hideAllModals(){
+	$("#key_modal").modal("hide");
+	$("#transactions_modal").modal("hide");
+	$("#claims_import_modal").modal("hide");
+	$("#payment_modal").modal("hide");
+	$("#partner_select_modal").modal("hide");
+	$("#login_modal").modal("hide");
+	$("#application_details_modal").modal("hide");
+}
+
 function showWait(message, twoLine) {
 	if (twoLine) {
-		$("#loading_spinner").find("img").css("margin-top", "28px");
-		$("#loading_spinner_message").css("padding-top", "10px");
+		$("#loading_spinner").find("img").css("margin-top", "-82px");
+		$("#loading_spinner_message").css("padding-top", "0px");
 	}
 	else {
-		$("#loading_spinner").find("img").css("margin-top", "0px");
+		$("#loading_spinner").find("img").css("margin-top", "-80px");
 		$("#loading_spinner_message").css("padding-top", "0px");
 	}
 
@@ -15,12 +48,22 @@ function showWait(message, twoLine) {
 	$("#loading_spinner").show();
 }
 
+function showRefreshSectionProgress(icon) {
+	$(icon).addClass("refresh");
+	$(icon).addClass("refresh-animation");
+}
+
+function hideRefreshSectionProgress(icon) {
+	$(icon).removeClass("refresh");
+	$(icon).removeClass("refresh-animation");
+}
+
 function hideWait() {
 	window.setTimeout(hideSpinner, 200);
 }
 
 function hideSpinner() {
-	$("#loading_spinner_message").text("&nbsp;");
+	$("#loading_spinner_message").text("");
 	$("#loading_spinner").hide();
 }
 
@@ -34,84 +77,93 @@ function makeStringReadable(str) {
 	return str;
 }
 
-window.addEventListener('focus', function () {
-	var img = _browser.extension.getURL("/images/shared/background.png");
-	$('body').css("background-image", '');
-	$('body').css("background-image", img);
-});
-
-
 //Utility
-async function loadPage(pageName, params, popup) {
-	var target = "./" + pageName + ".html";
-	if (params) {
-		target = target + "?params=" + params;
-	}
-
-	if (popup) {
-		var url = _browser.extension.getURL("/pages/" + pageName + ".html");
-		if (params) {
-			url = url + "?params=" + params;
+async function sendMessageToTab(tabId, message, focus) {
+	_browser.tabs.update(parseInt(tabId), { 'active': true, 'highlighted': true }, async function (tab) {
+		if(focus){
+			let tabInfo = await _browser.tabs.get(parseInt(tabId));
+			await _browser.windows.update(tabInfo.windowId, { "focused":true });
 		}
+		await _browser.tabs.sendMessage(tab.id, message);
+	});
+}
 
-		var height = 520;
-		var width = 515;
-		var windowSize = {
-			height,
-			width,
-			left: window.screenX,
-			top: window.screenY
-		};
-
-		window.close();
-		var res = await _browser.runtime.sendMessage({ target: 'background', action: 'openPopup', url, windowSize });
+async function loadPage(pageName, params, popup) {
+	if (popup) {
+		await _browser.runtime.sendMessage({ target: 'background', action: 'openPopup', params, pageName });
 	}
 	else {
-		location.href = target;
+		let url = "./" + pageName + ".html";
+		if (params)
+			url = url + "?" + params;
+
+		location.href = url;
 	}
 }
 
-function getParamsFromLocation() {
+function getParamAction(queryString) {
+	let action = {
+		action: "none",
+		loginRequest: null,
+		paymentRequest: {
+			amount: 0,
+			account: null,
+			identifier: null
+		},
+		sender: null
+	};
+
+	let params = getParamsFromQueryString(queryString);
+	if (!params || !Array.isArray(params) || params.length == 0)
+		return { action };
+
+	for (let i = 0; i < params.length; i++) {
+		if (params[i].key == "sender") {
+			action.sender = params[i].val;
+		}
+		else if (params[i].key == "login_request") {
+			action.action = "login";
+			action.loginRequest = params[i].val;
+		}
+		else if (params[i].key == "payment_amount") {
+			action.action = "payment";
+			action.paymentRequest.amount = params[i].val;
+		}
+		else if (params[i].key == "payment_address") {
+			action.action = "payment";
+			action.paymentRequest.address = params[i].val;
+		}
+		else if (params[i].key == "payment_identifier") {
+			action.action = "payment";
+			action.paymentRequest.identifier = params[i].val;
+		}
+	}
+
+	return action;
+}
+
+function getQueryStringFromLocation() {
 	var target = String(window.location);
-	var idx = target.lastIndexOf("params=");
+	var idx = target.lastIndexOf("?");
 	if (idx == -1)
 		return null;
 
-	return target.substring(idx + 7, target.length);
+	let params = target.substring(idx + 1, target.length);
+	console.log("param: " + params);
+	return params;
 }
 
-async function checkPassportLogin() {
-	var login = null;
-	try {
-		login = await getPassportLogin();
+function getParamsFromQueryString(qs) {
+	let params = [];
+	let pairs = qs.split('&');
+	for (let i = 0; i < pairs.length; i++) {
+		let pair = pairs[i].split('=');
+		params.push({
+			key: pair[0],
+			val: pair[1]
+		});
 	}
-	catch (err) {
-
-	}
-
-	if (login) {
-		loadPage("loginpassport");
-		return true;
-	}
-
-	return false;
-}
-
-async function checkPassportPayment(){
-	var payment = null;
-	try{
-		payment = await getPassportPayment();
-	}
-	catch(err){
-		alert(err);
-	}
-
-	if(payment){
-		loadPage("passportpayment");
-		return true;
-	}
-
-	return false;
+	return params;
 }
 
 function exportPassport(passport) {
@@ -131,55 +183,90 @@ function exportPassport(passport) {
 	document.body.appendChild(iframe);
 }
 
-async function checkBridgeOnline(){
+async function checkBridgeOnline() {
 	var bridgePassportId = await getBridgePassportId();
-	
-	if(bridgePassportId){
+
+	if (bridgePassportId) {
 		return true;
 	}
 
 	return false;
 }
 
-async function checkTransactionComplete(network, transactionId, callback) {
-	setTimeout(async function () {
-		var res = await checkBlockchainTransactionComplete(network, transactionId);
-		if(!res){
-			checkTransactionComplete(network, transactionId, callback);
-		}
-		else{
-			callback();
-		}
-	}, 15000);
-}
-
-async function checkApplicationPaymentStatus(applicationId, callback){
+async function checkApplicationPaymentStatus(applicationId, callback) {
 	setTimeout(async function () {
 		let application = await getApplication(applicationId);
-		if(application.status == "waitingForPayment"){
+		if (application.status == "waitingForPayment") {
 			checkApplicationPaymentStatus(applicationId, callback);
 		}
-		else{
+		else {
 			callback(application);
 		}
 	}, 15000);
 }
 
+
+function checkMissingLoginClaimType(missingClaimTypes, claimTypeId) {
+	for (let i = 0; i < missingClaimTypes.length; i++) {
+		if (missingClaimTypes[i].id == claimTypeId) {
+			return true;
+		}
+	}
+	return false;
+}
+
+async function getClaimsObjects(claims) {
+	if (!claims || claims.length == 0)
+		return claims;
+
+	let passportHelper = new BridgeProtocol.Passport(_settings.apiBaseUrl, _passport, _passphrase);
+	let claimHelper = new BridgeProtocol.Claim(_settings.apiBaseUrl, _passport, _passphrase);
+	let partnerHelper = new BridgeProtocol.Partner(_settings.apiBaseUrl, _passport, _passphrase);
+	for (let i = 0; i < claims.length; i++) {
+		claims[i].claimTypeName = claims[i].claimTypeId;
+		var type = await claimHelper.getClaimType(claims[i].claimTypeId);
+		if (type) {
+			claims[i].claimTypeName = type.name;
+		}
+
+		var partnerId = await passportHelper.getPassportIdForPublicKey(claims[i].signedByKey);
+		if (partnerId) {
+			claims[i].signedById = partnerId;
+			var partner = await partnerHelper.getPartner(partnerId);
+			if (partner) {
+				claims[i].signedByName = partner.name;
+			}
+		}
+	}
+
+	return claims;
+}
+
+async function getPartnerInfo(partnerId){
+	let partnerHelper = new BridgeProtocol.Partner(_settings.apiBaseUrl, _passport, _passphrase);
+    let partner = await partnerHelper.getPartner(partnerId);
+	if(partner.name == "Bridge Protocol Corporation"){
+		partner.color = "rgba(144,64,153,1)";
+		partner.icon = "/images/shared/bridge-token-white.png";
+	}
+	return partner;
+}
+
 //Background script messaging helpers
-async function getBridgePassportId(){
+async function getBridgePassportId() {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'getBridgePassportId' });
 }
 
-async function getPassphrase(callback) {
+async function getPassphrase() {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'getPassphrase' });
 }
 
-async function getPassportFromStorage(callback) {
+async function getPassportFromStorage() {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'getPassportFromStorage' });
 }
 
-async function createPassport(passphrase) {
-	return await _browser.runtime.sendMessage({ target: 'background', action: 'createPassport', passphrase });
+async function createPassport(passphrase, neoWif, autoCreate) {
+	return await _browser.runtime.sendMessage({ target: 'background', action: 'createPassport', passphrase, neoWif, autoCreate });
 }
 
 async function getPassportDetails() {
@@ -206,7 +293,7 @@ async function closePassport() {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'closePassport' });
 }
 
-async function removePassport(callback) {
+async function removePassport() {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'removePassport' });
 }
 
@@ -214,7 +301,7 @@ async function getPassportClaims() {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'getClaims' });
 }
 
-async function getApplications(callback) {
+async function getApplications() {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'getApplications' });
 }
 
@@ -226,11 +313,11 @@ async function createApplication(partner) {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'createApplication', partner });
 }
 
-async function updateApplicationTransaction(applicationId, network, transactionId){
+async function updateApplicationTransaction(applicationId, network, transactionId) {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'updateApplicationTransaction', applicationId, network, transactionId });
 }
 
-async function resendApplication(applicationId){
+async function resendApplication(applicationId) {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'resendApplication', applicationId });
 }
 
@@ -250,57 +337,8 @@ async function getVerificationPartners() {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'getVerificationPartners' });
 }
 
-async function getPassportLogin() {
-	try{
-		var tabs = await _browser.tabs.query({ active: true, currentWindow: true });
-		let message = {
-			action: 'getBridgeLoginRequest'
-		};
-	
-		return await _browser.tabs.sendMessage(tabs[0].id, message);
-	}
-	catch(err){
-		
-	}
-
-	return null;
-}
-
-async function getPassportPayment() {
-	try{
-		var tabs = await _browser.tabs.query({ active: true, currentWindow: true });
-		let message = {
-			action: 'getBridgePaymentRequest'
-		};
-	
-		return await _browser.tabs.sendMessage(tabs[0].id, message);
-	}
-	catch(err){
-
-	}
-
-	return null;
-}
-
-async function sendPassportLogin(passportId, responseValue) {
-	var tabs = await _browser.tabs.query({ active: true, currentWindow: true });
-	let message = {
-		action: 'sendBridgeLoginResponse',
-		passportId,
-		responseValue
-	};
-
-	return await _browser.tabs.sendMessage(tabs[0].id, message);
-}
-
-async function sendPassportPayment(transactionId){
-	var tabs = await _browser.tabs.query({ active: true, currentWindow: true });
-	let message = {
-		action: 'sendBridgePaymentResponse',
-		transactionId
-	};
-
-	return await _browser.tabs.sendMessage(tabs[0].id, message);
+async function getVerificationPartner(partnerId) {
+	return await _browser.runtime.sendMessage({ target: 'background', action: 'getVerificationPartne', partnerId });
 }
 
 async function getPassportLoginRequest(payload) {
@@ -311,15 +349,15 @@ async function getPassportLoginResponse(request, claimTypeIds) {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'getPassportLoginResponse', request, claimTypeIds });
 }
 
-async function removeAllApplicationClaims(applicationId, callback) {
+async function removeAllApplicationClaims(applicationId) {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'removeAllApplicationClaims', applicationId });
 }
 
-async function updateClaimPackages(claimPackages, callback) {
+async function updateClaimPackages(claimPackages) {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'updateClaimPackages', claimPackages });
 }
 
-async function getNetworkFee(){
+async function getNetworkFee() {
 	return await _browser.runtime.sendMessage({ target: 'background', action: 'getNetworkFee' });
 }
 
@@ -336,7 +374,7 @@ async function registerBlockchainAddress(network, address) {
 }
 
 async function sendBlockchainPayment(network, amount, paymentIdentifier, recipientAddress) {
-	return await _browser.runtime.sendMessage({ target: 'background', action: 'sendBlockchainPayment', network, amount, paymentIdentifier, recipientAddress});
+	return await _browser.runtime.sendMessage({ target: 'background', action: 'sendBlockchainPayment', network, amount, paymentIdentifier, recipientAddress });
 }
 
 async function getBlockchainPassportInfo(network, passportId) {

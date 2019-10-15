@@ -1,11 +1,15 @@
+var _params;
+
 $(function () {
+    _params = getQueryStringFromLocation();
+
     $("#create_passport_link").click(function () {
         $("#create_passport_container").show();
         $("#import_passport_container").hide();
     });
 
     $("#import_passport_link").click(function () {
-        loadPage("importpassport");
+        loadPage("importpassport", _params);
     });
 
     $("#create_passport_button").click(async function () {
@@ -27,9 +31,9 @@ $(function () {
         showWait("Creating Bridge Passport...");
         setTimeout(async function () {
             try {
-                var passport = await createPassport(passphrase);
+                var passport = await createPassport(passphrase, $("#neo_wif").val(), true);
                 if (passport) {
-                    loadPage("passportdetails");
+                    loadPage("main", _params);
                 }
                 else {
                     alert("Could not create passport");
@@ -61,6 +65,7 @@ $(function () {
         await saveSettings(_settings);
     });
 
+    $('.ui.accordion').accordion();
     hideWait();
 });
 

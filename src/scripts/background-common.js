@@ -4,15 +4,39 @@ async function wait(ms) {
   });
 }
 
-async function createPassport(passphrase) {
+async function createPassport(passphrase, neoWif, autoCreate) {
   let passportHelper = new BridgeProtocol.Passport();
-  let passport = await passportHelper.createPassport(passphrase);
+  let passport = await passportHelper.createPassport(passphrase, neoWif, autoCreate);
   if (passport) {
     _passphrase = passphrase;
     _passport = passport;
+
+    console.log("Created Passport: " + JSON.stringify(_passport));
+    console.log("Public Key:" + _passport.publicKey);
+
     await savePassportToBrowserStorage(_passport);
   }
   return passport;
+}
+
+async function getPassport() {
+  //We don't even have raw unlocked content loaded, we shouldn't get here
+  if (!_passport) {
+    return null;
+  }
+
+  //We don't have a valid passport object that's unlocked
+  if (!_passport.publicKey) {
+    //Otherwise we need to unlock it
+    console.log("Passport Content: " + JSON.stringify(_passport));
+    console.log("Key:" + _passport.publicKey);
+    let passportHelper = new BridgeProtocol.Passport(_settings.apiBaseUrl, _passport, _passphrase);
+    let passport = await passportHelper.loadPassportFromContent(JSON.stringify(_passport), _passphrase);
+    console.log("Passport Object: " + JSON.stringify(passport));
+    console.log("Key:" + passport.publicKey);
+  }
+
+  return _passport;
 }
 
 async function getPassportDetails() {
@@ -20,7 +44,7 @@ async function getPassportDetails() {
   return await passportHelper.getDetails(_passport.id);
 }
 
-async function getPassportIdForPublicKey(publicKey){
+async function getPassportIdForPublicKey(publicKey) {
   let passportHelper = new BridgeProtocol.Passport(_settings.apiBaseUrl, _passport, _passphrase);
   return await passportHelper.getPassportIdForPublicKey(publicKey);
 }
@@ -51,6 +75,9 @@ async function unlockPassport(passphrase) {
 
     _passphrase = passphrase;
     _passport = passport;
+
+    console.log("Unlocked Passport: " + JSON.stringify(_passport));
+    console.log("Public Key:" + _passport.publicKey);
   }
 
   return passport;
@@ -93,20 +120,31 @@ async function removePassport() {
 }
 
 async function closePassport() {
-  _passport = null;
   _passphrase = null;
 }
 
 async function getClaimsObjects(claims) {
-  if(!claims)
+  if (!claims)
     claims = new Array();
-    
-  for (let i = 0; i < claims.length; i++) {
-    claims[i].claimTypeName = claims[i].claimTypeId;
 
+  let partnerHelper = new BridgeProtocol.Partner(_settings.apiBaseUrl, _passport, _passphrase);
+
+  for (let i = 0; i < claims.length; i++) {
+    console.log(JSON.stringify(claims[i]));
+    claims[i].claimTypeName = claims[i].claimTypeId;
     var type = await getClaimTypeById(claims[i].claimTypeId);
-    if (type)
+    if (type) {
       claims[i].claimTypeName = type.name;
+    }
+
+    var partnerId = await getPassportIdForPublicKey(claims[i].signedByKey);
+    if (partnerId) {
+      claims[i].signedById = partnerId;
+      var partner = await partnerHelper.getPartner(partnerId);
+      if (partner) {
+        claims[i].signedByName = partner.name;
+      }
+    }
   }
 
   return claims;
@@ -119,7 +157,7 @@ async function getClaimTypeById(claimTypeId) {
     _claimTypes = await claimHelper.getAllClaimTypes();
   }
 
-  if(!_claimTypes){
+  if (!_claimTypes) {
     return null;
   }
 
@@ -142,10 +180,10 @@ async function getBridgePassportId() {
 
 async function createApplication(partner) {
   let applicationHelper = new BridgeProtocol.Application(_settings.apiBaseUrl, _passport, _passphrase);
-  return await applicationHelper.createApplication(partner); 
+  return await applicationHelper.createApplication(partner);
 }
 
-async function updateApplicationTransaction(applicationId, network, transactionId){
+async function updateApplicationTransaction(applicationId, network, transactionId) {
   let applicationHelper = new BridgeProtocol.Application(_settings.apiBaseUrl, _passport, _passphrase);
   return await applicationHelper.updatePaymentTransaction(applicationId, network, transactionId);
 }
@@ -157,64 +195,58 @@ async function resendApplication(applicationId) {
 
 async function getApplications() {
   let applicationHelper = new BridgeProtocol.Application(_settings.apiBaseUrl, _passport, _passphrase);
-  var applications = await applicationHelper.getAllApplications();
 
-  //Get the name if we can
-  for (let i = 0; i < applications.length; i++) {
-    var partner = await getVerificationPartner(applications[i].verificationPartner);
-    if (partner)
-      applications[i].verificationPartnerName = partner.name;
+  let error;
+  let applications;
+  try {
+    applications = await applicationHelper.getActiveApplications();
+    //Get the name if we can
+    for (let i = 0; i < applications.length; i++) {
+      var partner = await getVerificationPartner(applications[i].verificationPartner);
+      if (partner) {
+        applications[i].verificationPartnerName = partner.name;
+      }
+    }
+  }
+  catch (err) {
+    error = err.message;
+    console.log("Error retrieving applications: " + err);
   }
 
-  return applications;
+  return {applications, error};
 }
 
-async function getApplication(applicationId) {
+async function getApplication(applicationId, includeClaims) {
   let claimHelper = new BridgeProtocol.Claim(_settings.apiBaseUrl, _passport, _passphrase);
   let applicationHelper = new BridgeProtocol.Application(_settings.apiBaseUrl, _passport, _passphrase);
   var application = await applicationHelper.getApplication(applicationId);
   var partner = await getVerificationPartner(application.verificationPartner);
-
   if (partner)
     application.verificationPartnerName = partner.name;
 
-  //Decrypt the encrypted claims packages to display via the UI
-  var decryptedClaims = new Array();
-  for (let i = 0; i < application.claims.length; i++) {
-    var claim = await claimHelper.decryptClaimPackage(application.claims[i]);
-
-    //If we couldn't decrypt, it may be the old incompatible format
-    if (claim) {
-      var partner = await getVerificationPartner(claim.signedById);
-      if (partner)
-        claim.verificationPartnerName = partner.name;
-      var claimType = await getClaimTypeById(claim.claimTypeId);
-      if (claimType)
-        claim.claimTypeName = claimType.name;
-      decryptedClaims.push(claim);
-    }
+  if (includeClaims && application.claims && application.claims.length > 0) {
+    application.decryptedClaims = await getClaimsObjects(application.claims);
   }
-  application.decryptedClaims = decryptedClaims;
 
   return application;
 }
 
 async function getVerificationPartners() {
   if (!_verificationPartners) {
-    var verificationPartnerHelper = new BridgeProtocol.VerificationPartner(_settings.apiBaseUrl, _passport, _passphrase)
+    var verificationPartnerHelper = new BridgeProtocol.Partner(_settings.apiBaseUrl, _passport, _passphrase)
     _verificationPartners = await verificationPartnerHelper.getAllPartners();
   }
 
   var partners = new Array();
   for (let i = 0; i < _verificationPartners.length; i++) {
-     partners.push(_verificationPartners[i]);
+    partners.push(_verificationPartners[i]);
   }
   return partners;
 }
 
 async function getVerificationPartner(partnerId) {
   if (!_verificationPartners) {
-    var verificationPartnerHelper = new BridgeProtocol.VerificationPartner(_settings.apiBaseUrl, _passport, _passphrase)
+    var verificationPartnerHelper = new BridgeProtocol.Partner(_settings.apiBaseUrl, _passport, _passphrase)
     _verificationPartners = await verificationPartnerHelper.getAllPartners();
   }
 
@@ -365,10 +397,10 @@ async function sendBlockchainPayment(network, amount, paymentIdentifier, recipie
     _scriptHash = await blockchainHelper.getBridgeScriptHash(network);
   }
 
-  if(!recipientAddress){
+  if (!recipientAddress) {
     recipientAddress = await blockchainHelper.getBridgeWallet(network);
   }
-  
+
   var passportHelper = new BridgeProtocol.Passport(_settings.apiBaseUrl, _passport, _passphrase, _scriptHash);
   return await passportHelper.sendPayment(network, amount, recipientAddress, paymentIdentifier);
 }

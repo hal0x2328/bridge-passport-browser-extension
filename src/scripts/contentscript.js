@@ -1,37 +1,53 @@
-function sendBackgroundMessage(message, callback) {
-  chrome.runtime.sendMessage(message, callback);
-}
-
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   let res = null;
-  if (request.action == 'getBridgeLoginRequest') {
-    if($('#bridge_passport_login').length){
-      res = $('#bridge_protocol_passport_login_request').val();
-    }
-  }
-  
-  if(request.action == 'sendBridgeLoginResponse'){
-    $('#bridge_protocol_passport_login_response').val(request.responseValue).trigger('change');
-    $('#bridge_protocol_passport_login_passport_id').val(request.passportId).trigger('change');
-    $('#bridge_passport_login_form').attr('onsubmit', '');
-    $('#bridge_passport_login_form').submit();
+
+  if (request.action == 'sendBridgeLoginResponse') {
+    var event = new CustomEvent("bridge-protocol-login-response", {
+      detail: {
+        loginResponse: request.loginResponse
+      }
+    });
+    document.dispatchEvent(event);
   }
 
-  if(request.action == 'getBridgePaymentRequest'){
-    if($('#bridge_passport_payment').length)
-    {
-      var paymentIdentifier = $('#bridge_passport_payment_identifier').val();
-      var paymentAmount = $('#bridge_passport_payment_amount').val();
-      var paymentAddress = $('#bridge_passport_payment_address').val();
-      res = JSON.stringify({ paymentIdentifier, paymentAmount, paymentAddress });
-    }
+  if (request.action == 'sendBridgePaymentResponse') {
+    var event = new CustomEvent("bridge-protocol-payment-response", {
+      detail: {
+        paymentResponse: request.paymentResponse
+      }
+    });
+    document.dispatchEvent(event);
   }
 
-  if(request.action == 'sendBridgePaymentResponse'){
-    $('#bridge_passport_payment_transaction_id').val(request.transactionId).trigger('change');
-    $('#bridge_passport_payment_form').attr('onsubmit', '');
-    $('#bridge_passport_payment_form').submit();
-  }
-  
   sendResponse(res);
 });
+
+document.addEventListener("bridge-protocol-login-request", function (data) {
+  if (!data.detail.loginRequest) {
+    alert("loginRequest was not provided");
+    return;
+  }
+  console.log('Bridge Protocol Content Script: Login request received: ' + JSON.stringify(data.detail));
+  chrome.runtime.sendMessage({ target: "background", action: "login", detail: data.detail });
+});
+
+document.addEventListener("bridge-protocol-payment-request", function (data) {
+  if (!data.detail.paymentRequest) {
+    alert("paymentRequest was not provided");
+    return;
+  }
+
+  console.log('Bridge Protocol Content Script: Payment request received: ' + JSON.stringify(data.detail));
+  chrome.runtime.sendMessage({ target: "background", action: "payment", detail: data.detail });
+});
+
+document.addEventListener("bridge-protocol-claims-import-request", function (data) {
+  if (!data.detail.claimsImportRequest) {
+    alert("claimsImportRequest was not provided");
+    return;
+  }
+
+  console.log('Bridge Protocol Content Script: Claims import request received: ' + JSON.stringify(data.detail));
+  chrome.runtime.sendMessage({ target: "background", action: "claimsImport", detail: data.detail });
+});
+

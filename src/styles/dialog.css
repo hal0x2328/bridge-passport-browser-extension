@@ -1,0 +1,58 @@
+html, body {
+    background-color: #1b1c1d;
+    height: 100%;
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+  }
+  
+  body > .grid {
+    height: 100%;
+  }
+  
+  .column {
+    max-width: 640px;
+  }
+
+  button{
+      width:100%;
+  }
+
+  .settings-button{
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color:#9627ba !important; 
+    font-size:20px;
+  }
+  
+  #import_passport_link{
+    float:right !important;
+    color:white !important;
+  }
+  
+  .bridge-header-logo{
+    width:300px; 
+    margin:50px;
+  }
+
+  .modal-header{
+    padding: 1em !important;
+    font-size:1.1em !important;
+    background-color:#1b1c1d !important;
+    color: white !important;
+}
+
+.modal-header-image{
+    width:30px; 
+    margin-top:-6px; 
+    margin-right:12px; 
+    float:left;
+}
+
+  #loading_spinner_message{
+    min-height:100px !important;
+    vertical-align: top;
+    color:white !important;
+    padding-top:60px !important;
+  }
