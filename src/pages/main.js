@@ -173,8 +173,12 @@ async function initPayment(sender, paymentRequest) {
             $("#payment_amount").val(x.toFixed());
             $("#payment_identifier").val(identifier);
 
-            //TODO: Check the balance requested against the BRDG balance in the wallet
-            //And don't let them send if they don't have sufficient funds
+            let balances = await getBalancesForAddress(_passport.wallets[0].address);
+            if(!balances || !balances.brdg || balances.brdg < x){
+                alert("Insufficient funds for the requested amount.");
+                return;
+            }
+
             $("#payment_modal").modal({
                 closable: false,
                 onApprove: async function () {
@@ -569,7 +573,6 @@ async function initVerifications(wait) {
             //are added to the network
             $("#create_verification_request_button").unbind();
             $("#create_verification_request_button").click(async function () {
-                //TODO: Check balance
                 $("#partner_select_partner_id").val("");
                 $("#partner_select_dropdown").dropdown();
                 $("#verification_create_button").focus();
@@ -583,9 +586,15 @@ async function initVerifications(wait) {
                 $("#partner_select_partner_id").change(function () {
                     $("#partner_select_info").show();
                 });
+
                 $("#partner_select_modal").modal({
                     closable: false,
                     onApprove: async function () {
+                        let balances = await getBalancesForAddress(_passport.wallets[0].address);
+                        if(!balances || !balances.brdg || balances.brdg < 1){
+                            alert("Insufficient funds (BRDG) to cover network fee.");
+                            return false;
+                        }
                         showWait("Creating verification request");
                         setTimeout(async function () {
                             try {
@@ -640,8 +649,8 @@ async function initVerifications(wait) {
                                         catch (err) {
                                             alert("Unable to re-send Verification Request to Partner.  Partner may be offline, please try again later.");
                                         }
-                                        await initVerifications(true);
                                         await showApplicationDetails(application.id);
+                                        await initVerifications(false);
                                         hideWait();
                                     }, 50);
                                 }, 50);
