@@ -573,6 +573,14 @@ async function initVerifications(wait) {
             //are added to the network
             $("#create_verification_request_button").unbind();
             $("#create_verification_request_button").click(async function () {
+                //Check to make sure the passport is registered
+                let blockchainHelper = new BridgeProtocol.Blockchain(_settings.apiBaseUrl, _passport, _passphrase);
+                var info = await blockchainHelper.getPassportStatus("NEO", _passport.id);
+                if(!info){
+                    alert("Blockchain address / passport is not registered.  Please register and try again.");
+                    return;
+                }
+                    
                 $("#partner_select_partner_id").val("");
                 $("#partner_select_dropdown").dropdown();
                 $("#verification_create_button").focus();
