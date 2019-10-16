@@ -133,15 +133,13 @@ async function initClaimsImport(sender, claimsImportRequest) {
                     setTimeout(async function () {
                         try {
                             await updateClaimPackages(claimPackages);
-                            initClaims(true);
+                            await initClaims(true);
                         }
                         catch (err) {
                             alert("Could not update passport claim packages: " + err);
                             hideWait();
                         }
                     }, 50);
-
-                    hideWait();
                 },
                 onDeny: async function () {
                     hideWait();
