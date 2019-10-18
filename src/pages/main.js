@@ -174,6 +174,7 @@ async function initPayment(sender, paymentRequest) {
             let balances = await getBalancesForAddress(_passport.wallets[0].address);
             if(!balances || !balances.brdg || balances.brdg < x){
                 alert("Insufficient funds for the requested amount.");
+                hideWait();
                 return;
             }
 
@@ -599,6 +600,7 @@ async function initVerifications(wait) {
                         let balances = await getBalancesForAddress(_passport.wallets[0].address);
                         if(!balances || !balances.brdg || balances.brdg < 1){
                             alert("Insufficient funds (BRDG) to cover network fee.");
+                            hideWait();
                             return false;
                         }
                         showWait("Creating verification request");
@@ -769,6 +771,12 @@ function initSidebar() {
     $("#logout_button").click(async function () {
         await closePassport();
         window.close();
+    });
+
+    $("#about_button").click(function(){
+        var manifestData = chrome.runtime.getManifest();
+        $("#about_version").text(manifestData.version);
+        $("#about_modal").modal("show");
     });
 }
 

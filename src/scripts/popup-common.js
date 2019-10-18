@@ -85,6 +85,7 @@ async function sendMessageToTab(tabId, message, focus) {
 			await _browser.windows.update(tabInfo.windowId, { "focused":true });
 		}
 		await _browser.tabs.sendMessage(tab.id, message);
+		window.close();
 	});
 }
 

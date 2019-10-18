@@ -28,7 +28,11 @@
             <i class="cog icon"></i>
             Settings
         </a>
-        <a class="item" id="logout_button">
+        <a class="item" id="about_button">
+            <i class="info icon"></i>
+            About
+        </a>
+        <a class="item" id="about_button">
             <i class="power off icon"></i>
             Logout
         </a>
@@ -192,6 +196,38 @@
     <!-- End Content Templates -->
 
     <!-- Modals -->
+    <div id="about_modal" class="ui tiny dark modal">
+        <div class="header inverted top aligned modal-header">
+            <img class="modal-header-image" src="/images/shared/bridge-token.png" />
+            About Bridge Passport Browser Extension
+        </div>
+        <div class="ui content form" style="font-size:smaller;">
+            <div class="field">
+                <label>Version:</label>
+                <div id="about_version"></div>
+            </div>
+            <div class="field">
+                <label>License:</label>
+                <div>
+                    <p>This software is licensed under the Apache 2.0 License and is being provided to you on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  Bridge Protocol Corporation will not be held liable for any loss or damages resulting from the use of this software.  If you do not agree with these terms, you must stop using this software immediately.</p>
+                    <p>Please <a href="#" onnclick="window.open('https://github.com/bridge-protocol/bridge-passport-browser-extension/blob/master/LICENSE');">review the full license before using this software.</a></p>
+                </div>
+            </div>
+            <div class="field">
+                <label>Limitation of Liability:</label>
+                <div>
+                    It is your responsibility to ensure that you backup your passport and associated blockchain wallet private keys.  Bridge Protocol Corporation will not be held responsible for loss of funds, verified claims data, or any other damages resulting from the use of this software.
+                </div>
+            </div>
+            <div class="field">
+                <label>Assignment of Copyright:</label>
+                This software, "Bridge" Logo, and any other related content are Copyright ©2018-2019 Bridge Protcol Corporation, All Rights Reserved.  Some portions of this software and logos are copyright to their respective owners.  See <a href="#" onclick="window.open('https://github.com/bridge-protocol/bridge-passport-browser-extension/blob/master/src/scripts/ThirdPartyNotices.txt');">third party notices</a> for more details.
+            </div>
+        </div>
+        <div class="actions">
+            <div class="ui cancel button">Close</div>
+        </div>
+    </div>
     <div id="application_details_modal" class="ui tiny modal">
         <div class="header inverted top aligned modal-header">
             <img class="modal-header-image" src="/images/shared/bridge-token.png" />
@@ -395,7 +431,8 @@
             </div>
         </div>
         <div class="actions">
-            <div id="save_settings_button" class="ui button purple cancel">OK</div>
+            <div class="ui cancel button">Cancel</div>
+            <div id="save_settings_button" class="ui button purple cancel">Save</div>
         </div>
     </div>
 
