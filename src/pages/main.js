@@ -58,13 +58,9 @@ async function Init() {
     }
 
     initSidebar();
-    await initPassportDetails();
-    await initVerifications();
-    await initClaims();
-    await initBlockchainAddresses();
     initSettings();
-    initUI();
-
+    await initUI();
+    await initPassportDetails();
     //If we were launched from a request, now that we're loaded, do the action
     if (_params) {
         let action = getParamAction(_params);
@@ -75,8 +71,12 @@ async function Init() {
             await initPayment(action.sender, action.paymentRequest);
         }
     }
-
-    hideWait();
+    else{
+        await initVerifications();
+        await initClaims();
+        await initBlockchainAddresses();
+        hideWait();
+    }
 }
 
 async function initClaimsImport(sender, claimsImportRequest) {
@@ -105,6 +105,11 @@ async function initClaimsImport(sender, claimsImportRequest) {
                 for (let i = 0; i < decryptedClaims.length; i++) {
                     $("#claims_import_list").append(await getClaimItem(decryptedClaims[i], true, i));
                 }
+                $("#claims_import_list").find(".claim-template").css("cursor","pointer");
+                $("#claims_import_list").find(".claim-template").click(function(){
+                    var checkbox = $(this).find(".claim-type-id");
+                    $(checkbox).prop("checked", !$(checkbox).prop("checked"));
+                });
             }
             else {
                 $("#claims_import_list").empty();
@@ -207,9 +212,6 @@ async function initPayment(sender, paymentRequest) {
                             };
                             await sendMessageToTab(sender, message, true);
                             hideWait();
-                            if (_params) {
-                                loadPage("main");
-                            }
                         }
                         catch (err) {
                             alert("Error sending login response: " + err);
@@ -281,9 +283,6 @@ async function initLogin(sender, loginRequest) {
                             };
                             await sendMessageToTab(sender, message, true);
                             hideWait();
-                            if (_params) {
-                                loadPage("main");
-                            }
                         }
                         catch (err) {
                             alert("Error sending login response: " + err);
@@ -345,6 +344,14 @@ async function initUI() {
     $("#unload_button").show();
     $("#create_verification_request_button").show();
 
+
+    $("#license_link").click(function(){
+        window.open("https://github.com/bridge-protocol/bridge-passport-browser-extension/blob/master/LICENSE")
+    });
+    $("#third_party_link").click(function(){
+        window.open("https://github.com/bridge-protocol/bridge-passport-browser-extension/blob/master/src/scripts/ThirdPartyNotices.txt")
+    });
+
     //Set content heights
     $(".main-section").each(function () {
         let containerHeight = $(this).outerHeight();
@@ -352,10 +359,6 @@ async function initUI() {
         let footerHeight = $(this).find(".main-section-footer").outerHeight();
         let contentHeight = containerHeight - headerHeight - footerHeight - 1;
         $(this).find(".main-section-content").outerHeight(contentHeight);
-    });
-
-    $(".refresh-section-icon").click(function () {
-        showRefreshSectionProgress(this);
     });
 }
 
@@ -685,11 +688,11 @@ async function initVerifications(wait) {
 async function getApplicationItem(application) {
     var partner = await getPartnerInfo(application.verificationPartner);
     var applicationItem = $(_applicationTemplate).clone();
-    var link = $(applicationItem).find(".application-details-link");
     var createdDate = new Date(application.createdOn * 1000);
     var created = createdDate.toLocaleDateString() + " " + createdDate.toLocaleTimeString();
-    link.unbind();
-    link.click(function () {
+    applicationItem.css("cursor","pointer");
+    applicationItem.unbind();
+    applicationItem.click(function () {
         setTimeout(async function () {
             showWait("Loading verification request details");
             showApplicationDetails(application.id);

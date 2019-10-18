@@ -85,7 +85,6 @@ async function sendMessageToTab(tabId, message, focus) {
 			await _browser.windows.update(tabInfo.windowId, { "focused":true });
 		}
 		await _browser.tabs.sendMessage(tab.id, message);
-		window.close();
 	});
 }
 
@@ -126,17 +125,9 @@ function getParamAction(queryString) {
 			action.action = "login";
 			action.loginRequest = params[i].val;
 		}
-		else if (params[i].key == "payment_amount") {
+		else if (params[i].key == "payment_request") {
 			action.action = "payment";
-			action.paymentRequest.amount = params[i].val;
-		}
-		else if (params[i].key == "payment_address") {
-			action.action = "payment";
-			action.paymentRequest.address = params[i].val;
-		}
-		else if (params[i].key == "payment_identifier") {
-			action.action = "payment";
-			action.paymentRequest.identifier = params[i].val;
+			action.paymentRequest = params[i].val;
 		}
 	}
 

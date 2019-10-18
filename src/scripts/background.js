@@ -27,8 +27,6 @@ function openPopup(pageName, params) {
   //Set the window size
   let height = screen.height * .80;
   let width = screen.width * .50;
-  let left = window.screenX;
-  let top = window.screenY;
 
   if (height < 1024)
     height = screen.height;
@@ -40,11 +38,15 @@ function openPopup(pageName, params) {
   else if (width > 1280)
     width = 1280;
 
-  //Shift the window over by the width
-  if(window.screenX > width){
-    left = window.screenX - width;
-  }
-  
+  //Center the window
+  hcenter = screen.width * .50;
+  vcenter = screen.height * .50;
+  hoffset = width * .50;
+  voffset = height * .50;
+
+  let left = hcenter - hoffset;
+  let top = vcenter - voffset;
+
   let windowSize = {
     height,
     width,
@@ -122,9 +124,7 @@ _browser.runtime.onMessage.addListener(function (request, sender, sendResponse) 
   }
 
   if(request.action == "claimsImport"){
-    if(typeof popupWindowId === 'number'){
-      _browser.runtime.sendMessage({target:"popup", action:"claimsImport", sender: sender.tab.id, claimsImportRequest: request.detail.claimsImportRequest})
-    }
+    _browser.runtime.sendMessage({target:"popup", action:"claimsImport", sender: sender.tab.id, claimsImportRequest: request.detail.claimsImportRequest});
   }
 
   if (request.action == "openPopup") {
