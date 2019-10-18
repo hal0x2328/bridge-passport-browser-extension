@@ -22,18 +22,11 @@ async function createPassport(passphrase, neoWif, autoCreate) {
 async function getPassport() {
   //We don't even have raw unlocked content loaded, we shouldn't get here
   if (!_passport) {
-    return null;
+     _passport = await loadPassportFromBrowserStorage();
   }
 
-  //We don't have a valid passport object that's unlocked
-  if (!_passport.publicKey) {
-    //Otherwise we need to unlock it
-    console.log("Passport Content: " + JSON.stringify(_passport));
-    console.log("Key:" + _passport.publicKey);
-    let passportHelper = new BridgeProtocol.Passport(_settings.apiBaseUrl, _passport, _passphrase);
-    let passport = await passportHelper.loadPassportFromContent(JSON.stringify(_passport), _passphrase);
-    console.log("Passport Object: " + JSON.stringify(passport));
-    console.log("Key:" + passport.publicKey);
+  if(!_passport){
+    return null;
   }
 
   return _passport;

@@ -516,6 +516,7 @@ function initUnlock() {
             return;
         }
 
+        $("#unlock_passport_modal").modal("hide");
         showWait("Unlocking Bridge Passport");
         setTimeout(async function () {
             try {
@@ -532,7 +533,7 @@ function initUnlock() {
                 alert("Could not unlock passport: " + err);
                 hideWait();
             }
-        }, 50);
+        }, 100);
     });
 }
 
@@ -772,8 +773,11 @@ function initSidebar() {
     });
 
     $("#logout_button").click(async function () {
-        await closePassport();
-        window.close();
+        showWait("Logging out..");
+        setTimeout(async function(){
+            await closePassport();
+            window.close();
+        },100);
     });
 
     $("#about_button").click(function(){
