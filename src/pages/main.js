@@ -470,7 +470,7 @@ async function initClaimPublisehdBlockchainValue(claim){
         $("#claim_details_modal").find(".verified-claim-blockchain-remove-link").click(async function(){
             $("#claim_details_modal").find("#blockchain_spinner_message").text("Unpublishing from blockchain...");
             $("#claim_details_modal").find("#blockchain_spinner").addClass("active");
-            await BridgeProtocol.NEOUtility.sendRemoveClaimTransaction(3, _passport, _passphrase, true);
+            await BridgeProtocol.NEOUtility.sendRemoveClaimTransaction(claim.claimTypeId, _passport, _passphrase, true);
             $("#claim_details_modal").find("#blockchain_spinner").removeClass("active");
             await showClaimDetails(claim);
         });
