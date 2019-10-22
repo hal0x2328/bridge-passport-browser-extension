@@ -461,7 +461,7 @@ async function initClaimPublisehdBlockchainValue(claim){
         });
     }
     else{
-        $("#claim_details_modal").find(".verified-claim-blockchain-values").html("Date: " + new Date(published.time * 1000).toLocaleDateString() + "<br>Value: " + published.value);
+        $("#claim_details_modal").find(".verified-claim-blockchain-values").html(new Date(published.time * 1000).toLocaleDateString() + " - " + published.value);
         $("#claim_details_modal").find(".verified-claim-blockchain-values-container").show();
         $("#claim_details_modal").find(".verified-claim-blockchain-published").text("Published");
         $("#claim_details_modal").find(".verified-claim-blockchain-add-link").hide();
