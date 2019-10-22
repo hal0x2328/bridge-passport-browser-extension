@@ -195,6 +195,51 @@
     <!-- End Content Templates -->
 
     <!-- Modals -->
+    <div id="claim_details_modal" class="ui tiny modal">
+        <div class="header inverted top aligned modal-header">
+            <img class="modal-header-image" src="/images/shared/bridge-token.png" />
+            Verified Claim Details
+        </div>
+        <div class="ui content form">
+            <div class="field">
+                <label>Verified By</label>
+                <span class="verified-by"></span>
+            </div>
+            <div class="field">
+                <label>Verified On</label>
+                <span class="verified-on"></span>
+            </div>
+            <div class="field">
+                <label>Type</label>
+                <span class="verified-claim-type"></span>
+            </div>
+            <div class="field">
+                <label>Value</label>
+                <span class="verified-claim-value"></span>
+            </div>
+            <div class="field">
+                <label>Blockchain</label>
+                <div>
+                    <span class="verified-claim-blockchain-published">Not Published</span>
+                </div>
+            </div>
+            <div class="field verified-claim-blockchain-values-container" style="display:none;">
+                <label>Blockchain Values</label>
+                <span class="verified-claim-blockchain-values"></span>
+            </div>
+            <div class="field" style="text-align:center; margin-top:20px;">
+                <a href="#" class="ui button purple verified-claim-blockchain-add-link">Publish Claim to Blockchain</a>
+                <a href="#" class="ui button purple verified-claim-blockchain-remove-link" style="display:none;">Unpublish Claim from Blockchain</a>
+            </div>
+        </div>
+        <div class="actions">
+            <div id="verified_claim_cancel_button" class="ui cancel button">Close</div>
+        </div>
+        <div id="blockchain_spinner" class="ui inverted dimmer">
+            <div id="blockchain_spinner_message" class="ui text small loader">Please wait</div>
+            <img src="/images/shared/neo-logo.png" style="width:50px; margin-top:-30px;">
+        </div>
+    </div>
     <div id="about_modal" class="ui tiny dark modal">
         <div class="header inverted top aligned modal-header">
             <img class="modal-header-image" src="/images/shared/bridge-token.png" />
