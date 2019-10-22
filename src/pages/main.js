@@ -462,9 +462,11 @@ async function initClaimPublisehdBlockchainValue(claim){
         $("#claim_details_modal").find(".verified-claim-blockchain-values-container").show();
         $("#claim_details_modal").find(".verified-claim-blockchain-published").text("Published");
         $("#claim_details_modal").find(".verified-claim-blockchain-publish-update-link").click(async function(){
-            $("#claim_details_modal").find("#blockchain_spinner_message").text("Unpublishing from blockchain...");
-            $("#claim_details_modal").find("#blockchain_spinner").addClass("active");
-            await BridgeProtocol.NEOUtility.sendRemoveClaimTransaction(claim.claimTypeId, _passport, _passphrase, true);
+            var blockchainHelper = new BridgeProtocol.Blockchain(_settings.apiBaseUrl, _passport, _passphrase);
+            let res = await blockchainHelper.addClaim("neo", claim);
+            if(res == null){
+                alert("Error adding claim to blockchain");
+            }
             $("#claim_details_modal").find("#blockchain_spinner").removeClass("active");
             await showClaimDetails(claim);
         });
