@@ -445,10 +445,7 @@ async function initClaimPublisehdBlockchainValue(claim){
         $("#claim_details_modal").find(".verified-claim-blockchain-values").html("");
         $("#claim_details_modal").find(".verified-claim-blockchain-values-container").hide();
         $("#claim_details_modal").find(".verified-claim-blockchain-published").text("Not Published");
-        $("#claim_details_modal").find(".verified-claim-blockchain-add-link").show();
-        $("#claim_details_modal").find(".verified-claim-blockchain-remove-link").hide();
-        $("#claim_details_modal").find(".verified-claim-blockchain-add-link").unbind();
-        $("#claim_details_modal").find(".verified-claim-blockchain-add-link").click(async function(){
+        $("#claim_details_modal").find(".verified-claim-blockchain-publish-update-link").click(async function(){
             $("#claim_details_modal").find("#blockchain_spinner_message").text("Publishing to blockchain...");
             $("#claim_details_modal").find("#blockchain_spinner").addClass("active");
             var blockchainHelper = new BridgeProtocol.Blockchain(_settings.apiBaseUrl, _passport, _passphrase);
@@ -464,13 +461,12 @@ async function initClaimPublisehdBlockchainValue(claim){
         $("#claim_details_modal").find(".verified-claim-blockchain-values").html(new Date(published.time * 1000).toLocaleDateString() + " - " + published.value);
         $("#claim_details_modal").find(".verified-claim-blockchain-values-container").show();
         $("#claim_details_modal").find(".verified-claim-blockchain-published").text("Published");
-        $("#claim_details_modal").find(".verified-claim-blockchain-add-link").hide();
-        $("#claim_details_modal").find(".verified-claim-blockchain-remove-link").show();
-        $("#claim_details_modal").find(".verified-claim-blockchain-remove-link").unbind();
-        $("#claim_details_modal").find(".verified-claim-blockchain-remove-link").click(async function(){
-            $("#claim_details_modal").find("#blockchain_spinner_message").text("Unpublishing from blockchain...");
-            $("#claim_details_modal").find("#blockchain_spinner").addClass("active");
-            await BridgeProtocol.NEOUtility.sendRemoveClaimTransaction(3, _passport, _passphrase, true);
+        $("#claim_details_modal").find(".verified-claim-blockchain-publish-update-link").click(async function(){
+            var blockchainHelper = new BridgeProtocol.Blockchain(_settings.apiBaseUrl, _passport, _passphrase);
+            let res = await blockchainHelper.addClaim("neo", claim);
+            if(res == null){
+                alert("Error adding claim to blockchain");
+            }
             $("#claim_details_modal").find("#blockchain_spinner").removeClass("active");
             await showClaimDetails(claim);
         });
