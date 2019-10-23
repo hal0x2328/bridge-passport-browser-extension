@@ -419,16 +419,23 @@
         </div>
         <div class="ui content form">
             <div class="ui field">
-                <label>Recipient Address</label>
-                <input id="payment_address" readonly>
+                <label style="margin-top:-14px;">Payment Network</label>
+                <div><img src="/images/shared/neo-logo.png" style="width:12px;"> NEO</div>
             </div>
             <div class="ui field">
-                <label>Amount Requested</label>
-                <input id="payment_amount" readonly>
+                <label>Amount Requested </label>
+                <div>
+                    <img src="/images/shared/bridge-token.png" style="width:12px;">
+                    <span id="payment_amount"></span>
+                </div>
+            </div>
+            <div class="ui field">
+                <label>Recipient Address</label>
+                <div id="payment_address"></div>
             </div>
             <div class="ui field">
                 <label>Payment Identifier</label>
-                <input id="payment_identifier" readonly>
+                <div id="payment_identifier"></div>
             </div>
         </div>
         <div class="warnings"></div>

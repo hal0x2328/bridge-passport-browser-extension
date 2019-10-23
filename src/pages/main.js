@@ -171,10 +171,10 @@ async function initPayment(sender, paymentRequest) {
             let identifier = request.payload.paymentRequest.identifier;
             let passportId = request.passportId;
 
-            $("#payment_address").val(address);
+            $("#payment_address").text(address);
             let x = new BigNumber(amount * .00000001);
-            $("#payment_amount").val(x.toFixed());
-            $("#payment_identifier").val(identifier);
+            $("#payment_amount").text(x.toFixed());
+            $("#payment_identifier").text(identifier);
 
             let balances = await getBalancesForAddress(_passport.wallets[0].address);
             if(!balances || !balances.brdg || balances.brdg < x){
