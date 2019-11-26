@@ -312,7 +312,7 @@ function getLoginClaimItem(missingClaimTypes, claimType) {
     let name = claimType.name;
 
     if (checkMissingLoginClaimType(missingClaimTypes, claimType.id)) {
-        name += " (Missinng)";
+        name += " (Missing)";
         $(item).find("input").attr("disabled", true);
     }
     $(item).find(".login-claim-type-name").html(name);
